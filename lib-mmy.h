@@ -482,9 +482,14 @@ char* str_rstrip(char* str, char tostrip) {
 
 char* str_strip(char* str, char* tostrip) {
    assert(str_len(str) > 0);
-   for(int i = 0; i < str_len(tostrip); i++) {
-      str = str_lstrip(str, tostrip[i]);
-      str = str_rstrip(str, tostrip[i]);
+   int strippedSomething = 1;
+   while(strippedSomething) {
+      int length = str_len(str);
+      for(int i = 0; i < str_len(tostrip); i++) {
+         str = str_lstrip(str, tostrip[i]);
+         str = str_rstrip(str, tostrip[i]);
+      }
+      strippedSomething = (length != str_len(str));
    }
    return str;
 }

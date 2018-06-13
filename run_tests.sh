@@ -1,7 +1,5 @@
 #!/bin/bash
-flags="-ggdb -msse2 -Wno-write-strings"
+flags="-ggdb"
 
-g++ $flags -D DEBUG tests.cpp -o tests
-./tests
-
-#rm tests
+gcc $flags -D DEBUG tests.c -o tests-debug
+./tests-debug

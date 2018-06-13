@@ -86,7 +86,11 @@ int main() {
    str = str_copy("eeeeeeeeeeeklhgfgh         ");
    assert(str_equal(str_rstrip(str, ' '), "eeeeeeeeeeeklhgfgh"));
    assert(str_equal(str_lstrip(str, 'e'), "klhgfgh"));
+   free(str);
 
+   str = str_copy("(),(abc),");
+   assert(str_equal(str_strip(str, "(),"), "abc"));
+   free(str);
 
    str = str_copy("agfecbd");
    str_sort(str);
