@@ -49,10 +49,11 @@
       (k) int str_isint(char* str)
       (l) char* str_lstrip(char* str, char tostrip)
       (m) char* str_rstrip(char* str, char tostrip)
-      (n) void str_sort(char* str)
-      (o) char** str_split(char* str, char c, int* size)
-      (p) int str_toint(char* str)
-      (q) char* str_inttostr(int num)
+      (n) char* str_strip(char* str, char* tostrip)
+      (o) void str_sort(char* str)
+      (p) char** str_split(char* str, char c, int* size)
+      (q) int str_toint(char* str)
+      (r) char* str_inttostr(int num)
 
    005.
    Dynamic array. 
@@ -107,6 +108,7 @@ typedef double f64;
 
 // 001. START
 #if 1
+#include <stdlib.h> // for malloc, realloc, calloc
 void xmemset(unsigned char *ptr, unsigned char value, u64 size) {
    for(u64 i = 0; i < size; i++) {
       *ptr = value;
@@ -122,7 +124,6 @@ void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
    }
 }
 
-#include <stdlib.h>
 void *xmalloc(size_t num_bytes) {
     void *ptr = malloc(num_bytes);
     if (!ptr) {
@@ -475,6 +476,15 @@ char* str_rstrip(char* str, char tostrip) {
    while(*strPtr == tostrip) {
       *strPtr = '\0';
       strPtr--;
+   }
+   return str;
+}
+
+char* str_strip(char* str, char* tostrip) {
+   assert(str_len(str) > 0);
+   for(int i = 0; i < str_len(tostrip); i++) {
+      str = str_lstrip(str, tostrip[i]);
+      str = str_rstrip(str, tostrip[i]);
    }
    return str;
 }
