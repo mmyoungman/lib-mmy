@@ -8,7 +8,8 @@
       (d) Logging macros
 
    001.
-      (a) void memset(unsigned char *ptr, unsigned char value, u64 size)
+      (a) void xmemset(unsigned char *ptr, unsigned char value, u64 size)
+      (b) void xmemcpy(unsigned char *dst, unsigned char *src, u64 size)
 
    002. 
    Copied from https://github.com/nothings/stb/ (public domain). 
@@ -52,7 +53,7 @@
       (q) char* str_inttostr(int num)
 
    005.
-   Dynamic array. Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c
+   Dynamic array. Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
 
 */
 
@@ -104,10 +105,18 @@ typedef double f64;
 // 001. START
 #if 1
 // NOTE: Untested
-void memset(unsigned char *ptr, unsigned char value, u64 size) {
+void xmemset(unsigned char *ptr, unsigned char value, u64 size) {
    for(u64 i = 0; i < size; i++) {
       *ptr = value;
       ptr++;
+   }
+}
+
+void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
+   while(size > 0) {
+      *dst = *src;
+      src++, dst++;
+      size--;
    }
 }
 #endif
@@ -119,82 +128,83 @@ void memset(unsigned char *ptr, unsigned char value, u64 size) {
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <limits.h> // for ULONG_MAX
 
 typedef struct { char d[4]; } stb__4;
 typedef struct { char d[8]; } stb__8;
 
-void stb_swap(void *p, void *q, size_t sz) {
-    char buffer[256];
-    if (p == q) return;
-    if (sz == 4) {
-        stb__4 temp    = * ( stb__4 *) p;
-        * (stb__4 *) p = * ( stb__4 *) q;
-        * (stb__4 *) q = temp;
-        return;
-    } else if (sz == 8) {
-        stb__8 temp    = * ( stb__8 *) p;
-        * (stb__8 *) p = * ( stb__8 *) q;
-        * (stb__8 *) q = temp;
-        return;
-    }
+// optimize the small cases, though you shouldn't be calling this for those!
+void stb_swap(void *p, void *q, size_t sz)
+{
+   char buffer[256];
+   if (p == q) return;
+   if (sz == 4) {
+      stb__4 temp    = * ( stb__4 *) p;
+      * (stb__4 *) p = * ( stb__4 *) q;
+      * (stb__4 *) q = temp;
+      return;
+   } else if (sz == 8) {
+      stb__8 temp    = * ( stb__8 *) p;
+      * (stb__8 *) p = * ( stb__8 *) q;
+      * (stb__8 *) q = temp;
+      return;
+   }
 
-    while (sz > sizeof(buffer)) {
-        stb_swap(p, q, sizeof(buffer));
-        p = (char *) p + sizeof(buffer);
-        q = (char *) q + sizeof(buffer);
-        sz -= sizeof(buffer);
-    }
+   while (sz > sizeof(buffer)) {
+      stb_swap(p, q, sizeof(buffer));
+      p = (char *) p + sizeof(buffer);
+      q = (char *) q + sizeof(buffer);
+      sz -= sizeof(buffer);
+   }
 
-    memcpy(buffer, p     , sz);
-    memcpy(p     , q     , sz);
-    memcpy(q     , buffer, sz);
+   memcpy(buffer, p     , sz);
+   memcpy(p     , q     , sz);
+   memcpy(q     , buffer, sz);
 }
 
 static unsigned long stb__rand_seed=0;
 
-unsigned long stb_srandLCG(unsigned long seed) {
-    unsigned long previous = stb__rand_seed;
-    stb__rand_seed = seed;
-    return previous;
+unsigned long stb_srandLCG(unsigned long seed)
+{
+   unsigned long previous = stb__rand_seed;
+   stb__rand_seed = seed;
+   return previous;
 }
 
-unsigned long stb_randLCG(void) {
-    stb__rand_seed = stb__rand_seed * 2147001325 + 715136305; // NOTE(stb): BCPL generator
-    // shuffle non-random bits to the middle, and xor to decorrelate with seed
-    return 0x31415926 ^ ((stb__rand_seed >> 16) + (stb__rand_seed << 16));
+unsigned long stb_randLCG(void)
+{
+   stb__rand_seed = stb__rand_seed * 2147001325 + 715136305; // BCPL generator
+   // shuffle non-random bits to the middle, and xor to decorrelate with seed
+   return 0x31415926 ^ ((stb__rand_seed >> 16) + (stb__rand_seed << 16));
 }
 
-double stb_frandLCG(void) {
-    return stb_randLCG() / ((double) (1 << 16) * (1 << 16));
+void stb_shuffle(void *p, size_t n, size_t sz, unsigned long seed)
+{
+   char *a;
+   unsigned long old_seed;
+   int i;
+   if (seed)
+      old_seed = stb_srandLCG(seed);
+   a = (char *) p + (n-1) * sz;
+
+   for (i=n; i > 1; --i) {
+      int j = stb_randLCG() % i;
+      stb_swap(a, (char *) p + j * sz, sz);
+      a -= sz;
+   }
+   if (seed)
+      stb_srandLCG(old_seed);
 }
 
-void stb_shuffle(void *p, size_t n, size_t sz, unsigned long seed) {
-    char *a;
-    unsigned long old_seed;
-    int i;
-    if (seed) {
-        old_seed = stb_srandLCG(seed);
-    }
-    a = (char *) p + (n-1) * sz;
-
-    for (i=n; i > 1; --i) {
-        int j = stb_randLCG() % i;
-        stb_swap(a, (char *) p + j * sz, sz);
-        a -= sz;
-    }
-    if (seed) {
-        stb_srandLCG(old_seed);
-    }
+void stb_reverse(void *p, size_t n, size_t sz)
+{
+   int i,j = n-1;
+   for (i=0; i < j; ++i,--j) {
+      stb_swap((char *) p + i * sz, (char *) p + j * sz, sz);
+   }
 }
 
-void stb_reverse(void *p, size_t n, size_t sz) {
-    int i,j = n-1;
-    for (i=0; i < j; ++i,--j) {
-        stb_swap((char *) p + i * sz, (char *) p + j * sz, sz);
-    }
-}
-
-// NOTE(stb): public domain Mersenne Twister by Michael Brundage
+// public domain Mersenne Twister by Michael Brundage
 #define STB__MT_LEN       624
 
 int stb__mt_index = STB__MT_LEN*sizeof(unsigned long)+1;
@@ -202,15 +212,16 @@ unsigned long stb__mt_buffer[STB__MT_LEN];
 
 int srandcalled = 0;
 
-void stb_srand(unsigned long seed) {
-    srandcalled = 1;
+void stb_srand(unsigned long seed)
+{
+   srandcalled = 1;
 
-    int i;
-    unsigned long old = stb_srandLCG(seed);
-    for (i = 0; i < STB__MT_LEN; i++)
-        stb__mt_buffer[i] = stb_randLCG();
-    stb_srandLCG(old);
-    stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
+   int i;
+   unsigned long old = stb_srandLCG(seed);
+   for (i = 0; i < STB__MT_LEN; i++)
+      stb__mt_buffer[i] = stb_randLCG();
+   stb_srandLCG(old);
+   stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
 }
 
 #define STB__MT_IA           397
@@ -221,50 +232,49 @@ void stb_srand(unsigned long seed) {
 #define STB__TWIST(b,i,j)    ((b)[i] & STB__UPPER_MASK) | ((b)[j] & STB__LOWER_MASK)
 #define STB__MAGIC(s)        (((s)&1)*STB__MATRIX_A)
 
-unsigned long stb_rand() {
-    if(!srandcalled) {
-        stb_srand(time(NULL));
-    }
+unsigned long stb_rand()
+{
+   if(!srandcalled) stb_srand(time(NULL));
 
-    unsigned long * b = stb__mt_buffer;
-    int idx = stb__mt_index;
-    unsigned long s,r;
-    int i;
-
-    if (idx >= STB__MT_LEN*sizeof(unsigned long)) {
-        if (idx > STB__MT_LEN*sizeof(unsigned long)) {
-            stb_srand(0);
-        }
-        idx = 0;
-        i = 0;
-        for (; i < STB__MT_IB; i++) {
-            s = STB__TWIST(b, i, i+1);
-            b[i] = b[i + STB__MT_IA] ^ (s >> 1) ^ STB__MAGIC(s);
-        }
-        for (; i < STB__MT_LEN-1; i++) {
-            s = STB__TWIST(b, i, i+1);
-            b[i] = b[i - STB__MT_IB] ^ (s >> 1) ^ STB__MAGIC(s);
-        }
-
-        s = STB__TWIST(b, STB__MT_LEN-1, 0);
-        b[STB__MT_LEN-1] = b[STB__MT_IA-1] ^ (s >> 1) ^ STB__MAGIC(s);
-    }
-    stb__mt_index = idx + sizeof(unsigned long);
-
-    r = *(unsigned long *)((unsigned char *)b + idx);
-
-    r ^= (r >> 11);
-    r ^= (r << 7) & 0x9D2C5680;
-    r ^= (r << 15) & 0xEFC60000;
-    r ^= (r >> 18);
-
-    return r;
+   unsigned long * b = stb__mt_buffer;
+   int idx = stb__mt_index;
+   unsigned long s,r;
+   int i;
+	
+   if (idx >= STB__MT_LEN*sizeof(unsigned long)) {
+      if (idx > STB__MT_LEN*sizeof(unsigned long))
+         stb_srand(0);
+      idx = 0;
+      i = 0;
+      for (; i < STB__MT_IB; i++) {
+         s = STB__TWIST(b, i, i+1);
+         b[i] = b[i + STB__MT_IA] ^ (s >> 1) ^ STB__MAGIC(s);
+      }
+      for (; i < STB__MT_LEN-1; i++) {
+         s = STB__TWIST(b, i, i+1);
+         b[i] = b[i - STB__MT_IB] ^ (s >> 1) ^ STB__MAGIC(s);
+      }
+      
+      s = STB__TWIST(b, STB__MT_LEN-1, 0);
+      b[STB__MT_LEN-1] = b[STB__MT_IA-1] ^ (s >> 1) ^ STB__MAGIC(s);
+   }
+   stb__mt_index = idx + sizeof(unsigned long);
+   
+   r = *(unsigned long *)((unsigned char *)b + idx);
+   
+   r ^= (r >> 11);
+   r ^= (r << 7) & 0x9D2C5680;
+   r ^= (r << 15) & 0xEFC60000;
+   r ^= (r >> 18);
+   
+   return r;
 }
 
-double stb_frand(void) {
-    return stb_rand() / ((double) (1 << 16) * (1 << 16));
+double stb_frand(void)
+{
+   return (double) stb_rand() / ((double) ULONG_MAX);
+   //return (double) stb_rand() / ((double) (1 << 16) * (1 << 16)); // NOTE: This stopped working?
 }
-
 #endif
 // 002. END
 
@@ -557,7 +567,7 @@ char* str_inttostr(int num) {
 
 #if 1
 // 005. START
-#include <stdarg.h> // for va_list, va_start, va_end
+//#include <stdarg.h> // for arr_print, which uses va_list, va_start, va_end
 #define offsetof(st, m) ((size_t)&(((st *)0)->m))
 #define MAX(x, y) ((x) >= (y) ? (x) : (y))
 #define CLAMP_MIN(x, min) MAX(x, min)
@@ -596,8 +606,8 @@ typedef struct ArrHdr {
 #define arr_free(b) ((b) ? (free(arr__hdr(b)), (b) = NULL) : 0)
 #define arr_fit(b, n) ((n) <= arr_cap(b) ? 0 : ((b) = arr__grow((b), (n), sizeof(*(b)))))
 #define arr_push(b, ...) (arr_fit((b), 1 + arr_len(b)), (b)[arr__hdr(b)->len++] = (__VA_ARGS__))
-#define arr_printf(b, ...) ((b) = arr__printf((b), __VA_ARGS__))
 #define arr_clear(b) ((b) ? arr__hdr(b)->len = 0 : 0)
+//#define arr_printf(b, ...) ((b) = arr__printf((b), __VA_ARGS__))
 
 void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
     assert(arr_cap(buf) <= (SIZE_MAX - 1)/2);
@@ -616,43 +626,43 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
     return new_hdr->buf;
 }
 
-char *arr__printf(char *buf, const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    size_t cap = arr_cap(buf) - arr_len(buf);
-    size_t n = 1 + vsnprintf(arr_end(buf), cap, fmt, args);
-    va_end(args);
-    if (n > cap) {
-        arr_fit(buf, n + arr_len(buf));
-        va_start(args, fmt);
-        size_t new_cap = arr_cap(buf) - arr_len(buf);
-        n = 1 + vsnprintf(arr_end(buf), new_cap, fmt, args);
-        assert(n <= new_cap);
-        va_end(args);
-    }
-    arr__hdr(buf)->len += n - 1;
-    return buf;
-}
+//char *arr__printf(char *buf, const char *fmt, ...) {
+//    va_list args;
+//    va_start(args, fmt);
+//    size_t cap = arr_cap(buf) - arr_len(buf);
+//    size_t n = 1 + vsnprintf(arr_end(buf), cap, fmt, args);
+//    va_end(args);
+//    if (n > cap) {
+//        arr_fit(buf, n + arr_len(buf));
+//        va_start(args, fmt);
+//        size_t new_cap = arr_cap(buf) - arr_len(buf);
+//        n = 1 + vsnprintf(arr_end(buf), new_cap, fmt, args);
+//        assert(n <= new_cap);
+//        va_end(args);
+//    }
+//    arr__hdr(buf)->len += n - 1;
+//    return buf;
+//}
 
-void arr_test(void) {
-    int *buf = NULL;
-    assert(arr_len(buf) == 0);
-    int n = 1024;
-    for (int i = 0; i < n; i++) {
-        arr_push(buf, i);
-    }
-    assert(arr_len(buf) == n);
-    for (size_t i = 0; i < arr_len(buf); i++) {
-        assert(buf[i] == i);
-    }
-    arr_free(buf);
-    assert(buf == NULL);
-    assert(arr_len(buf) == 0);
-    char *str = NULL;
-    arr_printf(str, "One: %d\n", 1);
-    assert(strcmp(str, "One: 1\n") == 0);
-    arr_printf(str, "Hex: 0x%x\n", 0x12345678);
-    assert(strcmp(str, "One: 1\nHex: 0x12345678\n") == 0);
-}
+//void arr_test(void) {
+//    int *buf = NULL;
+//    assert(arr_len(buf) == 0);
+//    int n = 1024;
+//    for (int i = 0; i < n; i++) {
+//        arr_push(buf, i);
+//    }
+//    assert(arr_len(buf) == n);
+//    for (size_t i = 0; i < arr_len(buf); i++) {
+//        assert(buf[i] == i);
+//    }
+//    arr_free(buf);
+//    assert(buf == NULL);
+//    assert(arr_len(buf) == 0);
+//    char *str = NULL;
+//    arr_printf(str, "One: %d\n", 1);
+//    assert(strcmp(str, "One: 1\n") == 0);
+//    arr_printf(str, "Hex: 0x%x\n", 0x12345678);
+//    assert(strcmp(str, "One: 1\nHex: 0x12345678\n") == 0);
+//}
 // 005. END
 #endif

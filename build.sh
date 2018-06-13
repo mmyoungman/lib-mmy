@@ -1,4 +1,5 @@
 #!/bin/bash
-flags="-ggdb -msse2 -fpermissive -Wno-write-strings"
+unset flags
+flags="-ggdb"
 
-g++ $flags -D DEBUG tests.cpp -o tests-debug
+gcc $flags -D DEBUG tests.c -o tests-debug

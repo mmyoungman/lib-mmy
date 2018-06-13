@@ -1,9 +1,7 @@
 #include "lib-mmy.h"
 
-int main()
-{
-
-   dbg("Starting tests...\n\n");
+int main() {
+   dbg("Starting tests...");
 
    // Test 000.
    assert(1024 == kilobytes(1));
@@ -20,6 +18,20 @@ int main()
 
 
    // Test 002.
+   //for(int i = 0; i < 10; i++) {
+   //   unsigned long rand = stb_rand();
+   //   dbg("rand: %lu\t\t%d", rand, rand >= 0 && rand <= ULONG_MAX);
+   //   double frand = stb_frand();
+   //   dbg("frand: %f\t\t%d", frand, frand >= 0 && frand < 1);
+   //}
+
+   for(int i = 0; i < 1000000; i++) {
+      unsigned long rand = stb_rand();
+      assert(rand >= 0 && rand < ULONG_MAX);
+
+      double frand = stb_frand();
+      assert(frand >= 0 && frand < 1);
+   }
 
 
    // Test 003.
@@ -94,7 +106,50 @@ int main()
    assert(str_toint("1234") == 1234);
    assert(str_toint("-12345") == -12345);
 
-   // shouldAssert(str_toint("12-12"));
+   // Have a version of assert for things that should break?
+   // shouldBreak(str_toint("12-12"));
+   
 
-   dbg("End of tests\n\n");
+   // 005. Tests
+   #include <stdarg.h>
+   #define arr_printf(b, ...) ((b) = arr__printf((b), __VA_ARGS__))
+   char *arr__printf(char *buf, const char *fmt, ...) {
+       va_list args;
+       va_start(args, fmt);
+       size_t cap = arr_cap(buf) - arr_len(buf);
+       size_t n = 1 + vsnprintf(arr_end(buf), cap, fmt, args);
+       va_end(args);
+       if (n > cap) {
+           arr_fit(buf, n + arr_len(buf));
+           va_start(args, fmt);
+           size_t new_cap = arr_cap(buf) - arr_len(buf);
+           n = 1 + vsnprintf(arr_end(buf), new_cap, fmt, args);
+           assert(n <= new_cap);
+           va_end(args);
+       }
+       arr__hdr(buf)->len += n - 1;
+       return buf;
+   }
+   
+   int *buf = NULL;
+   assert(arr_len(buf) == 0);
+   int n = 1024;
+   for (int i = 0; i < n; i++) {
+       arr_push(buf, i);
+   }
+   assert(arr_len(buf) == n);
+   for (size_t i = 0; i < arr_len(buf); i++) {
+       assert(buf[i] == i);
+   }
+   arr_free(buf);
+   assert(buf == NULL);
+   assert(arr_len(buf) == 0);
+
+   char *bstr = NULL;
+   arr_printf(bstr, "One: %d\n", 1);
+   assert(str_equal(bstr, "One: 1\n"));
+   arr_printf(bstr, "Hex: 0x%x\n", 0x12345678);
+   assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
+
+   dbg("End of tests");
 }
