@@ -1,0 +1,13 @@
+# Ctags
+tags
+
+# QtCreator files
+lib-mmy.config
+lib-mmy.creator
+lib-mmy.creator.user
+lib-mmy.files
+lib-mmy.includes
+
+# Binaries
+tests
+tests-debug
