@@ -10,6 +10,8 @@
    001.
       (a) void xmemset(unsigned char *ptr, unsigned char value, u64 size)
       (b) void xmemcpy(unsigned char *dst, unsigned char *src, u64 size)
+      (c) void* xmalloc(size_t num_bytes)
+      (d) void* xrealloc(void *ptr, size_t num_bytes)
 
    002. 
    Copied from https://github.com/nothings/stb/ (public domain). 
@@ -35,12 +37,12 @@
    004. 
    ANSI string operations.
       (a) int str_len(char* str)
-      (b) int str_equal(char *a, char *b)
-      (c) void str_copy(char *s, char *copy)
+      (b) int str_equal(char* a, char* b)
+      (c) void str_copy(char* s, char* copy)
       (d) char* str_copy(char *s)
-      (e) int str_beginswith(char *str, char *start)
-      (f) int str_endswith(char *str, char *end)
-      (g) char* str_concat(char *str, char *addition)
+      (e) int str_beginswith(char* str, char* start)
+      (f) int str_endswith(char* str, char* end)
+      (g) char* str_concat(char* str, char* addition)
       (h) void str_lower(char* str)
       (i) void str_upper(char* str)
       (j) int str_isalpha(char* str)
@@ -53,7 +55,8 @@
       (q) char* str_inttostr(int num)
 
    005.
-   Dynamic array. Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
+   Dynamic array. 
+   Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
 
 */
 
@@ -104,7 +107,6 @@ typedef double f64;
 
 // 001. START
 #if 1
-// NOTE: Untested
 void xmemset(unsigned char *ptr, unsigned char value, u64 size) {
    for(u64 i = 0; i < size; i++) {
       *ptr = value;
@@ -119,13 +121,30 @@ void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
       size--;
    }
 }
+
+#include <stdlib.h>
+void *xmalloc(size_t num_bytes) {
+    void *ptr = malloc(num_bytes);
+    if (!ptr) {
+        perror("xmalloc failed");
+        exit(1);
+    }
+    return ptr;
+}
+
+void *xrealloc(void *ptr, size_t num_bytes) {
+    ptr = realloc(ptr, num_bytes);
+    if (!ptr) {
+        perror("xrealloc failed");
+        exit(1);
+    }
+    return ptr;
+}
 #endif
 // 001. END
 
 // 002. START
 #if 1
-
-#include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <limits.h> // for ULONG_MAX
@@ -157,9 +176,9 @@ void stb_swap(void *p, void *q, size_t sz)
       sz -= sizeof(buffer);
    }
 
-   memcpy(buffer, p     , sz);
-   memcpy(p     , q     , sz);
-   memcpy(q     , buffer, sz);
+   xmemcpy(buffer, p     , sz);
+   xmemcpy(p     , q     , sz);
+   xmemcpy(q     , buffer, sz);
 }
 
 static unsigned long stb__rand_seed=0;
@@ -334,8 +353,6 @@ int mth_pow(int num, int pow) {
 
 // 004. START
 #if 1
-//#include <stdlib.h>
-
 int str_len(char *str) {
      char* ptr = str;
      while(*ptr != '\0')
@@ -350,6 +367,7 @@ int str_equal(char *a, char *b) {
   return ((*a == '\0') && (*b == '\0'));
 }
 
+// No overloading in C...
 //void str_copy(char *s, char *copy) {
 //     while(*s != '\0') {
 //          *copy = *s;
@@ -561,34 +579,14 @@ char* str_inttostr(int num) {
    *resPtr = '\0';
    return res;
 }
-
 #endif
 // 004. END
 
 #if 1
 // 005. START
-//#include <stdarg.h> // for arr_print, which uses va_list, va_start, va_end
 #define offsetof(st, m) ((size_t)&(((st *)0)->m))
 #define MAX(x, y) ((x) >= (y) ? (x) : (y))
 #define CLAMP_MIN(x, min) MAX(x, min)
-
-void *xrealloc(void *ptr, size_t num_bytes) {
-    ptr = realloc(ptr, num_bytes);
-    if (!ptr) {
-        perror("xrealloc failed");
-        exit(1);
-    }
-    return ptr;
-}
-
-void *xmalloc(size_t num_bytes) {
-    void *ptr = malloc(num_bytes);
-    if (!ptr) {
-        perror("xmalloc failed");
-        exit(1);
-    }
-    return ptr;
-}
 
 typedef struct ArrHdr {
     size_t len;
@@ -607,7 +605,6 @@ typedef struct ArrHdr {
 #define arr_fit(b, n) ((n) <= arr_cap(b) ? 0 : ((b) = arr__grow((b), (n), sizeof(*(b)))))
 #define arr_push(b, ...) (arr_fit((b), 1 + arr_len(b)), (b)[arr__hdr(b)->len++] = (__VA_ARGS__))
 #define arr_clear(b) ((b) ? arr__hdr(b)->len = 0 : 0)
-//#define arr_printf(b, ...) ((b) = arr__printf((b), __VA_ARGS__))
 
 void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
     assert(arr_cap(buf) <= (SIZE_MAX - 1)/2);
@@ -626,43 +623,5 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
     return new_hdr->buf;
 }
 
-//char *arr__printf(char *buf, const char *fmt, ...) {
-//    va_list args;
-//    va_start(args, fmt);
-//    size_t cap = arr_cap(buf) - arr_len(buf);
-//    size_t n = 1 + vsnprintf(arr_end(buf), cap, fmt, args);
-//    va_end(args);
-//    if (n > cap) {
-//        arr_fit(buf, n + arr_len(buf));
-//        va_start(args, fmt);
-//        size_t new_cap = arr_cap(buf) - arr_len(buf);
-//        n = 1 + vsnprintf(arr_end(buf), new_cap, fmt, args);
-//        assert(n <= new_cap);
-//        va_end(args);
-//    }
-//    arr__hdr(buf)->len += n - 1;
-//    return buf;
-//}
-
-//void arr_test(void) {
-//    int *buf = NULL;
-//    assert(arr_len(buf) == 0);
-//    int n = 1024;
-//    for (int i = 0; i < n; i++) {
-//        arr_push(buf, i);
-//    }
-//    assert(arr_len(buf) == n);
-//    for (size_t i = 0; i < arr_len(buf); i++) {
-//        assert(buf[i] == i);
-//    }
-//    arr_free(buf);
-//    assert(buf == NULL);
-//    assert(arr_len(buf) == 0);
-//    char *str = NULL;
-//    arr_printf(str, "One: %d\n", 1);
-//    assert(strcmp(str, "One: 1\n") == 0);
-//    arr_printf(str, "Hex: 0x%x\n", 0x12345678);
-//    assert(strcmp(str, "One: 1\nHex: 0x12345678\n") == 0);
-//}
 // 005. END
 #endif
