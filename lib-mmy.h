@@ -145,8 +145,7 @@ void *xrealloc(void *ptr, size_t num_bytes) {
 
 // 002. START
 #if 1
-#include <time.h>
-#include <string.h>
+#include <time.h> // for time()
 #include <limits.h> // for ULONG_MAX
 
 typedef struct { char d[4]; } stb__4;
