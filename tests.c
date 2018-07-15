@@ -155,5 +155,21 @@ int main() {
    arr_printf(bstr, "Hex: 0x%x\n", 0x12345678);
    assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
 
+   // 006. Tests
+   HashTable *t = xmalloc(sizeof(HashTable));
+   t->len = 0;
+   t->cap = 1024;
+   t->buf = (HtRecord**)xmalloc(sizeof(HtRecord*) * t->cap);
+
+   int newKey = 1026;
+   int *newValue = xmalloc(sizeof(int)); 
+   *newValue = 10;
+   ht_insert(t, newKey, newValue);
+
+   int newKey2 = 2;
+   int *newValue2 = xmalloc(sizeof(int)); 
+   *newValue2 = 11;
+   ht_insert(t, newKey2, newValue2);
+
    dbg("End of tests");
 }

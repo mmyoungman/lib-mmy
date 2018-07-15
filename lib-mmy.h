@@ -59,6 +59,9 @@
    Dynamic array. 
    Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
 
+   006.
+   Hash table.
+
 */
 
 // 000. START 
@@ -125,7 +128,8 @@ void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
 }
 
 void *xmalloc(size_t num_bytes) {
-    void *ptr = malloc(num_bytes);
+    //void *ptr = malloc(num_bytes);
+    void *ptr = calloc(1, num_bytes); // because calloc initialises memory to zero
     if (!ptr) {
         perror("xmalloc failed");
         exit(1);
@@ -636,6 +640,62 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
     new_hdr->cap = new_cap;
     return new_hdr->buf;
 }
-
 // 005. END
+#endif
+
+#if 1
+// 006. START
+
+typedef struct HtRecord {
+    int key;
+    void *value;
+} HtRecord;
+
+typedef struct HashTable {
+    size_t len;
+    size_t cap;
+    HtRecord **buf;
+} HashTable;
+
+int ht_hash(HashTable *ht, int key) {
+    // TODO(mark): do some stuff with key
+    return key % ht->cap;
+}
+
+void ht_insert(HashTable *ht, int key, void *value) {
+    assert(ht != NULL);
+    assert((ht->len + 1) * 2 <= ht->cap);
+
+    int index = ht_hash(ht, key);
+    while(1) {
+        if(ht->buf[index] == NULL) {
+            ht->buf[index] = xmalloc(sizeof(HtRecord));
+            ht->buf[index]->key = key;
+            ht->buf[index]->value = value;
+            ht->len++;
+            return;
+        } else {
+            index++;
+            index %= ht->cap;
+        }
+    }
+}
+
+//void *ht_search(HashTable *ht, int *key) {
+//    assert(ht != NULL);
+//
+//    int index = ht_hash(ht, key);
+//    while(1) {
+//        if(ht->buf[index] != NULL) {
+//            if(ht->buf[index]->key == key) {
+//                return ht->buf[index].value;
+//            } else {
+//                index++;
+//            }
+//        } else { 
+//            return 0;
+//        }
+//    }
+//}
+// 006. END
 #endif
