@@ -654,6 +654,11 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 #if 1
 // 006. START
 
+// TODO(mark):
+// Test it can store structs
+// Make hash table automatically grow
+// Create a way to delete a value
+
 typedef struct HtRecord {
     char *key;
     void *value;
@@ -674,7 +679,7 @@ u64 ht_hash(HashTable *ht, char *key) {
         hash = ((hash << 5) + hash) + c; // hash * 33 + c
     }
 
-    dbg("hash: %d, modded: %d", hash, hash % ht->cap);
+    //dbg("hash: %d, modded: %d", hash, hash % ht->cap);
     return hash % ht->cap;
 }
 
@@ -700,17 +705,15 @@ void ht_insert(HashTable *ht, char *key, void *value) {
 void *ht_search(HashTable *ht, char *key) {
     assert(ht != NULL);
 
-    int index = ht_hash(ht, key);
+    u32 index = ht_hash(ht, key);
     while(1) {
         if(ht->buf[index] != NULL) {
             if(str_equal(ht->buf[index]->key, key)) {
-                dbg("Key %s. Found value: %d", key, *(int*)ht->buf[index]->value);
                 return ht->buf[index]->value;
             } else {
                 index++;
             }
         } else { 
-            dbg("Key %s. Not found.", key);
             return 0;
         }
     }

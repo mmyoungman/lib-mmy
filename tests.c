@@ -156,7 +156,7 @@ int main() {
    assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
 
    // 006. Tests
-   HashTable *t = xcalloc(sizeof(HashTable));
+   HashTable *t = xcalloc(sizeof(HashTable)); // memory needs to be initialised to zero
    t->len = 0;
    t->cap = 1024;
    t->buf = (HtRecord**)xcalloc(sizeof(HtRecord*) * t->cap);
