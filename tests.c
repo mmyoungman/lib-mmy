@@ -163,27 +163,31 @@ int main() {
 
    int *newValue = xmalloc(sizeof(int)); 
    *newValue = 10;
-   ht_insert(t, str_copy("by the power of grayskull"), newValue);
+   ht_insert(t, "by the power of grayskull", newValue);
 
    int *newValue2 = xmalloc(sizeof(int)); 
    *newValue2 = 11;
-   ht_insert(t, str_copy("this is a test key"), newValue2);
+   ht_insert(t, "this is a test key", newValue2);
 
    int *newValue3 = xmalloc(sizeof(int));
    *newValue3 = 12;
-   ht_insert(t, str_copy("wawaweewah"), newValue3);
+   ht_insert(t, "wawaweewah", newValue3);
 
-   int *found = (int*)ht_search(t, "by the power of grayskull");
-   int *found2 = (int*)ht_search(t, "this is a test key");
-   int *found3 = (int*)ht_search(t, "this is another test key");
-   int *found4 = (int*)ht_search(t, "key");
-   int *found5 = (int*)ht_search(t, "wawaweewah");
+   ht_insert(t, "stringkey", str_copy("This is a stored value!"));
+
+   int *found = ht_search(t, "by the power of grayskull");
+   int *found2 = ht_search(t, "this is a test key");
+   int *found3 = ht_search(t, "this is another test key");
+   int *found4 = ht_search(t, "key");
+   int *found5 = ht_search(t, "wawaweewah");
+   char *found6 = ht_search(t, "stringkey");
 
    assert(*found == 10);
    assert(*found2 == 11);
    assert(found3 == 0);
    assert(found4 == 0);
-   assert(*found5 == 12)
+   assert(*found5 == 12);
+   assert(str_equal(found6, "This is a stored value!"));
 
    dbg("End of tests");
 }

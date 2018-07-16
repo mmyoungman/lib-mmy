@@ -657,7 +657,8 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 
 // TODO(mark):
 // Test it can store structs
-// Create HashTable function?
+// create_ht function?
+// free_ht function?
 // Make hash table automatically grow
 // Create a way to delete a value
 
@@ -693,7 +694,7 @@ void ht_insert(HashTable *ht, char *key, void *value) {
     while(1) {
         if(ht->buf[index] == NULL) {
             ht->buf[index] = xmalloc(sizeof(HtRecord));
-            ht->buf[index]->key = key;
+            ht->buf[index]->key = str_copy(key);
             ht->buf[index]->value = value;
             ht->len++;
             return;
