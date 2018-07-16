@@ -156,20 +156,34 @@ int main() {
    assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
 
    // 006. Tests
-   HashTable *t = xmalloc(sizeof(HashTable));
+   HashTable *t = xcalloc(sizeof(HashTable));
    t->len = 0;
    t->cap = 1024;
-   t->buf = (HtRecord**)xmalloc(sizeof(HtRecord*) * t->cap);
+   t->buf = (HtRecord**)xcalloc(sizeof(HtRecord*) * t->cap);
 
-   int newKey = 1026;
-   int *newValue = xmalloc(sizeof(int)); 
+   int *newValue = xcalloc(sizeof(int)); 
    *newValue = 10;
-   ht_insert(t, newKey, newValue);
+   ht_insert(t, 1026, newValue);
 
-   int newKey2 = 2;
-   int *newValue2 = xmalloc(sizeof(int)); 
+   int *newValue2 = xcalloc(sizeof(int)); 
    *newValue2 = 11;
-   ht_insert(t, newKey2, newValue2);
+   ht_insert(t, 2, newValue2);
+
+   int *newValue3 = xcalloc(sizeof(int));
+   *newValue3 = 12;
+   ht_insert(t, 5, newValue3);
+
+   int *found = (int*)ht_search(t, 1026);
+   int *found2 = (int*)ht_search(t, 2);
+   int *found3 = (int*)ht_search(t, 3);
+   int *found4 = (int*)ht_search(t, 4);
+   int *found5 = (int*)ht_search(t, 5);
+
+   assert(*found == 10);
+   assert(*found2 == 11);
+   assert(found3 == 0);
+   assert(found4 == 0);
+   assert(*found5 == 12)
 
    dbg("End of tests");
 }

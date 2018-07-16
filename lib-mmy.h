@@ -128,10 +128,18 @@ void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
 }
 
 void *xmalloc(size_t num_bytes) {
-    //void *ptr = malloc(num_bytes);
-    void *ptr = calloc(1, num_bytes); // because calloc initialises memory to zero
+    void *ptr = malloc(num_bytes); 
     if (!ptr) {
         perror("xmalloc failed");
+        exit(1);
+    }
+    return ptr;
+}
+
+void *xcalloc(size_t num_bytes) {
+    void *ptr = calloc(1, num_bytes);
+    if (!ptr) {
+        perror("xcalloc failed");
         exit(1);
     }
     return ptr;
@@ -681,21 +689,23 @@ void ht_insert(HashTable *ht, int key, void *value) {
     }
 }
 
-//void *ht_search(HashTable *ht, int *key) {
-//    assert(ht != NULL);
-//
-//    int index = ht_hash(ht, key);
-//    while(1) {
-//        if(ht->buf[index] != NULL) {
-//            if(ht->buf[index]->key == key) {
-//                return ht->buf[index].value;
-//            } else {
-//                index++;
-//            }
-//        } else { 
-//            return 0;
-//        }
-//    }
-//}
+void *ht_search(HashTable *ht, int key) {
+    assert(ht != NULL);
+
+    int index = ht_hash(ht, key);
+    while(1) {
+        if(ht->buf[index] != NULL) {
+            if(ht->buf[index]->key == key) {
+                dbg("Key %d. Found value: %d", key, *(int*)ht->buf[index]->value);
+                return ht->buf[index]->value;
+            } else {
+                index++;
+            }
+        } else { 
+            dbg("Key %d. Not found.", key);
+            return 0;
+        }
+    }
+}
 // 006. END
 #endif
