@@ -156,20 +156,20 @@ int main() {
    assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
 
    // 006. Tests
-   HashTable *t = xcalloc(sizeof(HashTable)); // memory needs to be initialised to zero
+   HashTable *t = xmalloc(sizeof(HashTable));
    t->len = 0;
    t->cap = 1024;
-   t->buf = (HtRecord**)xcalloc(sizeof(HtRecord*) * t->cap);
+   t->buf = (HtRecord**)xcalloc(1, sizeof(HtRecord*) * t->cap); // memory needs to be initialised to zero, hence calloc
 
-   int *newValue = xcalloc(sizeof(int)); 
+   int *newValue = xmalloc(sizeof(int)); 
    *newValue = 10;
    ht_insert(t, str_copy("by the power of grayskull"), newValue);
 
-   int *newValue2 = xcalloc(sizeof(int)); 
+   int *newValue2 = xmalloc(sizeof(int)); 
    *newValue2 = 11;
    ht_insert(t, str_copy("this is a test key"), newValue2);
 
-   int *newValue3 = xcalloc(sizeof(int));
+   int *newValue3 = xmalloc(sizeof(int));
    *newValue3 = 12;
    ht_insert(t, str_copy("wawaweewah"), newValue3);
 

@@ -11,7 +11,8 @@
       (a) void xmemset(unsigned char *ptr, unsigned char value, u64 size)
       (b) void xmemcpy(unsigned char *dst, unsigned char *src, u64 size)
       (c) void* xmalloc(size_t num_bytes)
-      (d) void* xrealloc(void *ptr, size_t num_bytes)
+      (d) void* xcalloc(size_t nitems, size_t num_bytes)
+      (e) void* xrealloc(void *ptr, size_t num_bytes)
 
    002. 
    Copied from https://github.com/nothings/stb/ (public domain). 
@@ -136,8 +137,8 @@ void *xmalloc(size_t num_bytes) {
     return ptr;
 }
 
-void *xcalloc(size_t num_bytes) {
-    void *ptr = calloc(1, num_bytes);
+void *xcalloc(size_t nitems, size_t num_bytes) {
+    void *ptr = calloc(nitems, num_bytes);
     if (!ptr) {
         perror("xcalloc failed");
         exit(1);
@@ -656,6 +657,7 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 
 // TODO(mark):
 // Test it can store structs
+// Create HashTable function?
 // Make hash table automatically grow
 // Create a way to delete a value
 
