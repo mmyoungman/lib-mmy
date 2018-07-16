@@ -655,7 +655,7 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 // 006. START
 
 typedef struct HtRecord {
-    int key;
+    char *key;
     void *value;
 } HtRecord;
 
@@ -665,12 +665,20 @@ typedef struct HashTable {
     HtRecord **buf;
 } HashTable;
 
-int ht_hash(HashTable *ht, int key) {
-    // TODO(mark): do some stuff with key
-    return key % ht->cap;
+u64 ht_hash(HashTable *ht, char *key) {
+    // djb2 hash function
+    u64 hash = 5381;
+    s32 c;
+
+    while(c = *key++) {
+        hash = ((hash << 5) + hash) + c; // hash * 33 + c
+    }
+
+    dbg("hash: %d, modded: %d", hash, hash % ht->cap);
+    return hash % ht->cap;
 }
 
-void ht_insert(HashTable *ht, int key, void *value) {
+void ht_insert(HashTable *ht, char *key, void *value) {
     assert(ht != NULL);
     assert((ht->len + 1) * 2 <= ht->cap);
 
@@ -689,20 +697,20 @@ void ht_insert(HashTable *ht, int key, void *value) {
     }
 }
 
-void *ht_search(HashTable *ht, int key) {
+void *ht_search(HashTable *ht, char *key) {
     assert(ht != NULL);
 
     int index = ht_hash(ht, key);
     while(1) {
         if(ht->buf[index] != NULL) {
-            if(ht->buf[index]->key == key) {
-                dbg("Key %d. Found value: %d", key, *(int*)ht->buf[index]->value);
+            if(str_equal(ht->buf[index]->key, key)) {
+                dbg("Key %s. Found value: %d", key, *(int*)ht->buf[index]->value);
                 return ht->buf[index]->value;
             } else {
                 index++;
             }
         } else { 
-            dbg("Key %d. Not found.", key);
+            dbg("Key %s. Not found.", key);
             return 0;
         }
     }

@@ -163,21 +163,21 @@ int main() {
 
    int *newValue = xcalloc(sizeof(int)); 
    *newValue = 10;
-   ht_insert(t, 1026, newValue);
+   ht_insert(t, str_copy("by the power of grayskull"), newValue);
 
    int *newValue2 = xcalloc(sizeof(int)); 
    *newValue2 = 11;
-   ht_insert(t, 2, newValue2);
+   ht_insert(t, str_copy("this is a test key"), newValue2);
 
    int *newValue3 = xcalloc(sizeof(int));
    *newValue3 = 12;
-   ht_insert(t, 5, newValue3);
+   ht_insert(t, str_copy("wawaweewah"), newValue3);
 
-   int *found = (int*)ht_search(t, 1026);
-   int *found2 = (int*)ht_search(t, 2);
-   int *found3 = (int*)ht_search(t, 3);
-   int *found4 = (int*)ht_search(t, 4);
-   int *found5 = (int*)ht_search(t, 5);
+   int *found = (int*)ht_search(t, "by the power of grayskull");
+   int *found2 = (int*)ht_search(t, "this is a test key");
+   int *found3 = (int*)ht_search(t, "this is another test key");
+   int *found4 = (int*)ht_search(t, "key");
+   int *found5 = (int*)ht_search(t, "wawaweewah");
 
    assert(*found == 10);
    assert(*found2 == 11);
