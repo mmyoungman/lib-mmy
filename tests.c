@@ -156,7 +156,7 @@ int main() {
    assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
 
    // 006. Tests
-   HashTable t = ht_create();
+   HashTable *t = ht_create();
 
    int *newValue = xmalloc(sizeof(int)); 
    *newValue = 10;
@@ -196,6 +196,13 @@ int main() {
    assert(*found5 == 12);
    assert(str_equal(found6, "This is a stored value!"));
    assert(foundStruct->a == 13 && foundStruct->b == 14);
+
+   // To test ht_grow()
+   for(int i = 0; i < 10000; i++) {
+       int *forLoopValue = xmalloc(sizeof(int));
+       *forLoopValue = i;
+       ht_insert(t, str_inttostr(i), forLoopValue);
+   }
 
    ht_free(t);
 

@@ -656,8 +656,6 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 // 006. START
 
 // TODO(mark):
-// create_ht function?
-// free_ht function?
 // Make hash table automatically grow
 // Create a way to delete a value
 
@@ -667,30 +665,30 @@ typedef struct HtRecord {
 } HtRecord;
 
 typedef struct HashTable {
-    size_t len;
-    size_t cap;
+    u32 len;
+    u32 cap;
     HtRecord *buf;
 } HashTable;
 
-HashTable ht_create() {
-    HashTable ht;
-    ht.len = 0;
-    ht.cap = 1024;
-    ht.buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht.cap); // calloc to memset to zero
+HashTable *ht_create() {
+    HashTable *ht = xmalloc(sizeof(HashTable));;
+    ht->len = 0;
+    ht->cap = 1024;
+    ht->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht->cap); // calloc to memset to zero
     return ht;
 }
 
-void ht_free(HashTable ht) {
-    for(int i = 0; i < ht.cap; i++) {
-        if(ht.buf[i].key != 0) {
-            free(ht.buf[i].key);
-            free(ht.buf[i].value);
+void ht_free(HashTable *ht) {
+    for(int i = 0; i < ht->cap; i++) {
+        if(ht->buf[i].key != 0) {
+            free(ht->buf[i].key);
+            free(ht->buf[i].value);
         }
     }
-    free(ht.buf);
+    free(ht->buf);
 }
 
-u64 ht_hash(HashTable ht, char *key) {
+u64 ht_hash(HashTable *ht, char *key) {
     // djb2 hash function
     u64 hash = 5381;
     s32 c;
@@ -699,35 +697,51 @@ u64 ht_hash(HashTable ht, char *key) {
         hash = ((hash << 5) + hash) + c; // hash * 33 + c
     }
 
-    return hash % ht.cap;
+    return hash % ht->cap;
 }
 
-void ht_insert(HashTable ht, char *key, void *value) {
-    assert(ht.buf != 0);
-    assert((ht.len + 1) * 2 <= ht.cap);
+void ht_grow(HashTable *ht) {
+    int oldCap = ht->cap;
+    ht->cap = ht->cap * 2;
+    HtRecord *oldBuf = ht->buf;
+    ht->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht->cap); // calloc to memset to zero
+    for(int i = 0; i < oldCap; i++) {
+        if(oldBuf[i].key == 0) continue;
+        u64 hash = ht_hash(ht, oldBuf[i].key);
+        ht->buf[hash].key = oldBuf[i].key;
+        ht->buf[hash].value = oldBuf[i].value;
+    }
+    free(oldBuf);
+}
+
+void ht_insert(HashTable *ht, char *key, void *value) {
+    assert(ht->buf != 0);
+    if((ht->len + 1) * 2 >= ht->cap) {
+        ht_grow(ht);
+    }
 
     int index = ht_hash(ht, key);
     while(1) {
-        if(ht.buf[index].key == 0) {
-            ht.buf[index].key = str_copy(key);
-            ht.buf[index].value = value;
-            ht.len++;
+        if(ht->buf[index].key == 0) {
+            ht->buf[index].key = str_copy(key);
+            ht->buf[index].value = value;
+            ht->len++;
             return;
         } else {
             index++;
-            index %= ht.cap;
+            index %= ht->cap;
         }
     }
 }
 
-void *ht_search(HashTable ht, char *key) {
-    assert(ht.buf != 0);
+void *ht_search(HashTable *ht, char *key) {
+    assert(ht->buf != 0);
 
     u32 index = ht_hash(ht, key);
     while(1) {
-        if(ht.buf[index].key != 0) {
-            if(str_equal(ht.buf[index].key, key)) {
-                return ht.buf[index].value;
+        if(ht->buf[index].key != 0) {
+            if(str_equal(ht->buf[index].key, key)) {
+                return ht->buf[index].value;
             } else {
                 index++;
             }
