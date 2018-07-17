@@ -686,6 +686,7 @@ void ht_free(HashTable *ht) {
         }
     }
     free(ht->buf);
+    free(ht);
 }
 
 u64 ht_hash(HashTable *ht, char *key) {
@@ -696,7 +697,7 @@ u64 ht_hash(HashTable *ht, char *key) {
     while(c = *key++) {
         hash = ((hash << 5) + hash) + c; // hash * 33 + c
     }
-
+    
     return hash % ht->cap;
 }
 
@@ -708,6 +709,9 @@ void ht_grow(HashTable *ht) {
     for(int i = 0; i < oldCap; i++) {
         if(oldBuf[i].key == 0) continue;
         u64 hash = ht_hash(ht, oldBuf[i].key);
+        while(ht->buf[hash].key != 0) {
+            hash = (hash + 1) % ht->cap;
+        }
         ht->buf[hash].key = oldBuf[i].key;
         ht->buf[hash].value = oldBuf[i].value;
     }
@@ -728,8 +732,7 @@ void ht_insert(HashTable *ht, char *key, void *value) {
             ht->len++;
             return;
         } else {
-            index++;
-            index %= ht->cap;
+            index = (index + 1) % ht->cap;
         }
     }
 }
@@ -743,7 +746,7 @@ void *ht_search(HashTable *ht, char *key) {
             if(str_equal(ht->buf[index].key, key)) {
                 return ht->buf[index].value;
             } else {
-                index++;
+                index = (index + 1) % ht->cap;
             }
         } else { 
             return 0;

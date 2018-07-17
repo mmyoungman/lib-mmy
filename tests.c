@@ -204,6 +204,12 @@ int main() {
        ht_insert(t, str_inttostr(i), forLoopValue);
    }
 
+   for(int i = 0; i < 10000; i++) {
+       char *key = str_inttostr(i);
+       int *value = ht_search(t, key);
+       assert(i == *value);
+   }
+
    ht_free(t);
 
    dbg("End of tests");
