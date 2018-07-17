@@ -656,7 +656,6 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 // 006. START
 
 // TODO(mark):
-// Make hash table automatically grow
 // Create a way to delete a value
 
 typedef struct HtRecord {
@@ -693,7 +692,6 @@ u64 ht_hash(HashTable *ht, char *key) {
     // djb2 hash function
     u64 hash = 5381;
     s32 c;
-
     while(c = *key++) {
         hash = ((hash << 5) + hash) + c; // hash * 33 + c
     }
@@ -708,6 +706,7 @@ void ht_grow(HashTable *ht) {
     ht->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht->cap); // calloc to memset to zero
     for(int i = 0; i < oldCap; i++) {
         if(oldBuf[i].key == 0) continue;
+
         u64 hash = ht_hash(ht, oldBuf[i].key);
         while(ht->buf[hash].key != 0) {
             hash = (hash + 1) % ht->cap;
@@ -750,6 +749,22 @@ void *ht_search(HashTable *ht, char *key) {
             }
         } else { 
             return 0;
+        }
+    }
+}
+
+// TODO: Fix -- all HtRecords after a removed HtRecord must be reinserted
+void ht_delete(HashTable *ht, char *key) {
+    u64 hash = ht_hash(ht, key);
+    while(1) {
+        if(ht->buf[hash].key != 0) {
+            if(str_equal(ht->buf[hash].key, key)) {
+                ht->buf[hash].key = 0;
+                free(ht->buf[hash].value);
+                break;
+            } else {
+                hash = (hash + 1) % ht->cap;
+            }
         }
     }
 }

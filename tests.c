@@ -204,10 +204,16 @@ int main() {
        ht_insert(t, str_inttostr(i), forLoopValue);
    }
 
+   // To test ht_delete()
+   ht_delete(t, "3998");
+   ht_delete(t, "1234");
+   ht_delete(t, "9234");
+
    for(int i = 0; i < 10000; i++) {
        char *key = str_inttostr(i);
        int *value = ht_search(t, key);
-       assert(i == *value);
+       if(i == 1234 || i == 3998 || i == 9234) { assert(value == 0); } 
+       else { assert(i == *value); }
    }
 
    ht_free(t);
