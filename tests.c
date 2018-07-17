@@ -197,5 +197,7 @@ int main() {
    assert(str_equal(found6, "This is a stored value!"));
    assert(foundStruct->a == 13 && foundStruct->b == 14);
 
+   ht_free(t);
+
    dbg("End of tests");
 }

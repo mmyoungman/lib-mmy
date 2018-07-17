@@ -680,6 +680,16 @@ HashTable ht_create() {
     return ht;
 }
 
+void ht_free(HashTable ht) {
+    for(int i = 0; i < ht.cap; i++) {
+        if(ht.buf[i].key != 0) {
+            free(ht.buf[i].key);
+            free(ht.buf[i].value);
+        }
+    }
+    free(ht.buf);
+}
+
 u64 ht_hash(HashTable ht, char *key) {
     // djb2 hash function
     u64 hash = 5381;
