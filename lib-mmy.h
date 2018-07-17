@@ -656,6 +656,7 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 // 006. START
 
 // TODO(mark):
+// ht store htrecords rather than points to htrecords
 // Test it can store structs
 // create_ht function?
 // free_ht function?
@@ -670,7 +671,7 @@ typedef struct HtRecord {
 typedef struct HashTable {
     size_t len;
     size_t cap;
-    HtRecord **buf;
+    HtRecord *buf;
 } HashTable;
 
 u64 ht_hash(HashTable *ht, char *key) {
@@ -687,15 +688,14 @@ u64 ht_hash(HashTable *ht, char *key) {
 }
 
 void ht_insert(HashTable *ht, char *key, void *value) {
-    assert(ht != NULL);
+    assert(ht != 0);
     assert((ht->len + 1) * 2 <= ht->cap);
 
     int index = ht_hash(ht, key);
     while(1) {
-        if(ht->buf[index] == NULL) {
-            ht->buf[index] = xmalloc(sizeof(HtRecord));
-            ht->buf[index]->key = str_copy(key);
-            ht->buf[index]->value = value;
+        if(ht->buf[index].key == 0) {
+            ht->buf[index].key = str_copy(key);
+            ht->buf[index].value = value;
             ht->len++;
             return;
         } else {
@@ -706,13 +706,13 @@ void ht_insert(HashTable *ht, char *key, void *value) {
 }
 
 void *ht_search(HashTable *ht, char *key) {
-    assert(ht != NULL);
+    assert(ht != 0);
 
     u32 index = ht_hash(ht, key);
     while(1) {
-        if(ht->buf[index] != NULL) {
-            if(str_equal(ht->buf[index]->key, key)) {
-                return ht->buf[index]->value;
+        if(ht->buf[index].key != 0) {
+            if(str_equal(ht->buf[index].key, key)) {
+                return ht->buf[index].value;
             } else {
                 index++;
             }

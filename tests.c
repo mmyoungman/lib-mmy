@@ -159,7 +159,7 @@ int main() {
    HashTable *t = xmalloc(sizeof(HashTable));
    t->len = 0;
    t->cap = 1024;
-   t->buf = (HtRecord**)xcalloc(1, sizeof(HtRecord*) * t->cap); // memory needs to be initialised to zero, hence calloc
+   t->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * t->cap); // memory needs to be initialised to zero, hence calloc
 
    int *newValue = xmalloc(sizeof(int)); 
    *newValue = 10;
