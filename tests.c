@@ -156,10 +156,7 @@ int main() {
    assert(str_equal(bstr, "One: 1\nHex: 0x12345678\n"));
 
    // 006. Tests
-   HashTable *t = xmalloc(sizeof(HashTable));
-   t->len = 0;
-   t->cap = 1024;
-   t->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * t->cap); // memory needs to be initialised to zero, hence calloc
+   HashTable t = ht_create();
 
    int *newValue = xmalloc(sizeof(int)); 
    *newValue = 10;
