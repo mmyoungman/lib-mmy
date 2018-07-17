@@ -656,8 +656,6 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 // 006. START
 
 // TODO(mark):
-// ht store htrecords rather than points to htrecords
-// Test it can store structs
 // create_ht function?
 // free_ht function?
 // Make hash table automatically grow
@@ -683,7 +681,6 @@ u64 ht_hash(HashTable *ht, char *key) {
         hash = ((hash << 5) + hash) + c; // hash * 33 + c
     }
 
-    //dbg("hash: %d, modded: %d", hash, hash % ht->cap);
     return hash % ht->cap;
 }
 

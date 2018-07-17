@@ -181,6 +181,16 @@ int main() {
    int *found4 = ht_search(t, "key");
    int *found5 = ht_search(t, "wawaweewah");
    char *found6 = ht_search(t, "stringkey");
+   typedef struct TestStruct {
+       int a;
+       int b;
+   } TestStruct;
+   TestStruct *testStruct = xmalloc(sizeof(TestStruct));
+   testStruct->a = 13;
+   testStruct->b = 14;
+
+   ht_insert(t, "test-struct", testStruct);
+   TestStruct *foundStruct = ht_search(t, "test-struct");
 
    assert(*found == 10);
    assert(*found2 == 11);
@@ -188,6 +198,7 @@ int main() {
    assert(found4 == 0);
    assert(*found5 == 12);
    assert(str_equal(found6, "This is a stored value!"));
+   assert(foundStruct->a == 13 && foundStruct->b == 14);
 
    dbg("End of tests");
 }
