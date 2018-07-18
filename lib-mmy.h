@@ -710,19 +710,18 @@ void ht_grow(HashTable *ht) {
         ht->buf[hash].key = oldBuf[i].key;
         ht->buf[hash].value = oldBuf[i].value;
     }
-    dbg("It grew to %d!", ht->cap);
     free(oldBuf);
 }
 
 void ht_insert(HashTable *ht, char *key, void *value) {
-    assert(ht->buf != 0);
+    assert(ht->buf);
     if((ht->len + 1) * 2 >= ht->cap) {
         ht_grow(ht);
     }
 
     int index = ht_hash(ht, key);
     while(1) {
-        if(ht->buf[index].key == 0) {
+        if(!ht->buf[index].key) {
             ht->buf[index].key = str_copy(key);
             ht->buf[index].value = value;
             ht->len++;
@@ -739,11 +738,11 @@ void ht_insert(HashTable *ht, char *key, void *value) {
 }
 
 void *ht_search(HashTable *ht, char *key) {
-    assert(ht->buf != 0);
+    assert(ht->buf);
 
     u32 index = ht_hash(ht, key);
     while(1) {
-        if(ht->buf[index].key != 0) {
+        if(ht->buf[index].key) {
             if(str_equal(ht->buf[index].key, key)) {
                 return ht->buf[index].value;
             } else {
@@ -758,29 +757,26 @@ void *ht_search(HashTable *ht, char *key) {
 void ht_delete(HashTable *ht, char *key) {
     u64 hash = ht_hash(ht, key);
     while(1) {
-        if(ht->buf[hash].key != 0) {
-            if(str_equal(ht->buf[hash].key, key)) {
+        if(!ht->buf[hash].key) {
+            break;
+        } else if(str_equal(ht->buf[hash].key, key)) {
+            ht->buf[hash].key = 0;
+            free(ht->buf[hash].value);
+            ht->buf[hash].value = 0;
+            ht->len--;
+            // NOTE: Need to reinsert all records until the next empty slot
+            while(ht->buf[hash+1].key != 0) {
+                hash++;
+                char* tmpKey = ht->buf[hash].key;
+                void* tmpValue = ht->buf[hash].value;
                 ht->buf[hash].key = 0;
-                free(ht->buf[hash].value);
                 ht->buf[hash].value = 0;
-                ht->len--;
-                // NOTE: Need to reinsert any adjacent HtRecords
-                while(ht->buf[hash+1].key != 0) {
-                    hash++;
-                    char* tmpKey = ht->buf[hash].key;
-                    void* tmpValue = ht->buf[hash].value;
-                    ht->buf[hash].key = 0;
-                    ht->buf[hash].value = 0;
-                    ht_insert(ht, tmpKey, tmpValue);
-                }
-                break;
-            } else {
-                hash = (hash + 1) % ht->cap;
-                continue;
+                ht_insert(ht, tmpKey, tmpValue);
             }
+            break;
+        } else {
+            hash = (hash + 1) % ht->cap;
         }
-        // if no entry found...
-        break;
     }
 }
 // 006. END
