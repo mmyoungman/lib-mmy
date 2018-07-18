@@ -731,7 +731,6 @@ void ht_insert(HashTable *ht, char *key, void *value) {
         } else if(str_equal(ht->buf[index].key, key)) {
             free(ht->buf[index].value);
             ht->buf[index].value = value;
-            ht->len++;
             return;
         } else {
             index = (index + 1) % ht->cap;
@@ -763,6 +762,8 @@ void ht_delete(HashTable *ht, char *key) {
             if(str_equal(ht->buf[hash].key, key)) {
                 ht->buf[hash].key = 0;
                 free(ht->buf[hash].value);
+                ht->buf[hash].value = 0;
+                ht->len--;
                 // NOTE: Need to reinsert any adjacent HtRecords
                 while(ht->buf[hash+1].key != 0) {
                     hash++;
