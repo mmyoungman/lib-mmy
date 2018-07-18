@@ -654,10 +654,6 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 
 #if 1
 // 006. START
-
-// TODO(mark):
-// Create a way to delete a value
-
 typedef struct HtRecord {
     char *key;
     void *value;
@@ -730,6 +726,12 @@ void ht_insert(HashTable *ht, char *key, void *value) {
             ht->buf[index].value = value;
             ht->len++;
             return;
+        // Overwrite existing values of the same key
+        } else if(str_equal(ht->buf[index].key, key)) {
+            free(ht->buf[index].value);
+            ht->buf[index].value = value;
+            ht->len++;
+            return;
         } else {
             index = (index + 1) % ht->cap;
         }
@@ -753,7 +755,6 @@ void *ht_search(HashTable *ht, char *key) {
     }
 }
 
-// TODO: Fix -- all HtRecords after a removed HtRecord must be reinserted
 void ht_delete(HashTable *ht, char *key) {
     u64 hash = ht_hash(ht, key);
     while(1) {
@@ -761,11 +762,23 @@ void ht_delete(HashTable *ht, char *key) {
             if(str_equal(ht->buf[hash].key, key)) {
                 ht->buf[hash].key = 0;
                 free(ht->buf[hash].value);
+                // NOTE: Need to reinsert any adjacent HtRecords
+                while(ht->buf[hash+1].key != 0) {
+                    hash++;
+                    char* tmpKey = ht->buf[hash].key;
+                    void* tmpValue = ht->buf[hash].value;
+                    ht->buf[hash].key = 0;
+                    ht->buf[hash].value = 0;
+                    ht_insert(ht, tmpKey, tmpValue);
+                }
                 break;
             } else {
                 hash = (hash + 1) % ht->cap;
+                continue;
             }
         }
+        // if no entry found...
+        break;
     }
 }
 // 006. END
