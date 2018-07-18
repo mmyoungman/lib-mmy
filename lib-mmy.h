@@ -710,6 +710,7 @@ void ht_grow(HashTable *ht) {
         ht->buf[hash].key = oldBuf[i].key;
         ht->buf[hash].value = oldBuf[i].value;
     }
+    dbg("It grew to %d!", ht->cap);
     free(oldBuf);
 }
 
