@@ -684,7 +684,7 @@ void ht_free(HashTable *ht) {
     free(ht);
 }
 
-u64 ht_hash(HashTable *ht, char *key) {
+int ht_hash(HashTable *ht, char *key) {
     // djb2 hash function
     u64 hash = 5381;
     s32 c;
@@ -695,22 +695,21 @@ u64 ht_hash(HashTable *ht, char *key) {
     return hash % ht->cap;
 }
 
+void ht_insert(HashTable *ht, char *key, void *value);
+
 void ht_grow(HashTable *ht) {
     int oldCap = ht->cap;
     ht->cap = ht->cap * 2;
     HtRecord *oldBuf = ht->buf;
     ht->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht->cap); // calloc to memset to zero
+    ht->len = 0; //because the keys get reinserted
     for(int i = 0; i < oldCap; i++) {
-        if(oldBuf[i].key == 0) continue;
-
-        u64 hash = ht_hash(ht, oldBuf[i].key);
-        while(ht->buf[hash].key != 0) {
-            hash = (hash + 1) % ht->cap;
-        }
-        ht->buf[hash].key = oldBuf[i].key;
-        ht->buf[hash].value = oldBuf[i].value;
+        if(oldBuf[i].value == 0) continue;
+        ht_insert(ht, oldBuf[i].key, oldBuf[i].value);
+        free(oldBuf[i].key);
     }
     free(oldBuf);
+    //dbg("Grown to %d", ht->cap);
 }
 
 void ht_insert(HashTable *ht, char *key, void *value) {
@@ -765,13 +764,15 @@ void ht_delete(HashTable *ht, char *key) {
             ht->buf[hash].value = 0;
             ht->len--;
             // NOTE: Need to reinsert all records until the next empty slot
-            while(ht->buf[hash+1].key != 0) {
-                hash++;
+            while(ht->buf[(hash + 1) % ht->cap].key) {
+                hash = (hash + 1) % ht->cap;
                 char* tmpKey = ht->buf[hash].key;
                 void* tmpValue = ht->buf[hash].value;
                 ht->buf[hash].key = 0;
                 ht->buf[hash].value = 0;
                 ht_insert(ht, tmpKey, tmpValue);
+                free(tmpKey); // because insert mallocs for the key
+                ht->len--; // because insert increments len
             }
             break;
         } else {

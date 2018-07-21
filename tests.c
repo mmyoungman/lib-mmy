@@ -161,19 +161,25 @@ int main() {
     int *newValue = xmalloc(sizeof(int)); 
     *newValue = 10;
     ht_insert(t, "by the power of grayskull", newValue);
+    assert(t->len == 1);
 
     int *newValue2 = xmalloc(sizeof(int)); 
     *newValue2 = 11;
     ht_insert(t, "this is a test key", newValue2);
+    assert(t->len == 2);
 
     int *newValue3a = xmalloc(sizeof(int));
     *newValue3a = 12;
     int *newValue3b = xmalloc(sizeof(int));
     *newValue3b = 15;
     ht_insert(t, "wawaweewah", newValue3a);
+    assert(t->len == 3);
+
     ht_insert(t, "wawaweewah", newValue3b);
+    assert(t->len == 3);
 
     ht_insert(t, "stringkey", str_copy("This is a stored value!"));
+    assert(t->len == 4);
 
     int *found = ht_search(t, "by the power of grayskull");
     int *found2 = ht_search(t, "this is a test key");
@@ -191,6 +197,7 @@ int main() {
     testStruct->b = 14;
 
     ht_insert(t, "test-struct", testStruct);
+    assert(t->len == 5);
     TestStruct *foundStruct = ht_search(t, "test-struct");
 
     assert(*found == 10);
@@ -201,49 +208,47 @@ int main() {
     assert(str_equal(found6, "This is a stored value!"));
     assert(foundStruct->a == 13 && foundStruct->b == 14);
 
-    for(int a = 0; a < 50000; a++) {
-    //for(int a = 0; a < 10000; a++) {
-        dbg("a: %d, len: %d, cap: %d", a, t->len, t->cap);
-        // To test ht_grow()
+    for(int a = 0; a < 30000; a++) { // to test for memory leaks
         for(int i = 0; i < 10000; i++) {
+            char *forLoopKey = str_inttostr(i);
             int *forLoopValue = xmalloc(sizeof(int));
             *forLoopValue = i;
-            char *forLoopKey = str_inttostr(i);
             ht_insert(t, forLoopKey, forLoopValue);
             free(forLoopKey);
         }
 
+        assert(t->len == 10005);
+
         // To test ht_delete()
         int testKey1 = stb_rand() % 10000;
         int testKey2 = stb_rand() % 10000;
-        int testKey3 = stb_rand() % 10000;
-        int testKey4 = stb_rand() % 10000;
-        int testKey5 = stb_rand() % 10000;
+        int testKey3 = stb_rand() % 10000; 
+
+        while(testKey2 == testKey1) testKey2 = stb_rand() % 10000;
+        while(testKey3 == testKey1 || testKey3 == testKey2) testKey3 = stb_rand() % 10000;
 
         char *testStr1 = str_inttostr(testKey1);
         char *testStr2 = str_inttostr(testKey2);
         char *testStr3 = str_inttostr(testKey3);
-        char *testStr4 = str_inttostr(testKey4);
-        char *testStr5 = str_inttostr(testKey5);
 
         ht_delete(t, testStr1);
+        assert(t->len == 10004);
         ht_delete(t, testStr1); // delete an entry that doesn't exist
+        assert(t->len == 10004); // because nothing deleted
         ht_delete(t, testStr2);
+        assert(t->len == 10003);
         ht_delete(t, testStr3);
-        ht_delete(t, testStr4);
-        ht_delete(t, testStr5);
+        assert(t->len == 10002);
 
         free(testStr1);
         free(testStr2);
         free(testStr3);
-        free(testStr4);
-        free(testStr5);
 
         for(int i = 0; i < 10000; i++) {
             char *key = str_inttostr(i);
             int *value = ht_search(t, key);
             free(key);
-            if(i == testKey1 || i == testKey2 || i == testKey3 || i == testKey4 || i == testKey5) {
+            if(i == testKey1 || i == testKey2 || i == testKey3) {
                 assert(value == 0);
             }
             else { assert(i == *value); }
