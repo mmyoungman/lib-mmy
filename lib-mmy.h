@@ -39,22 +39,21 @@
    ANSI string operations.
       (a) int str_len(char* str)
       (b) int str_equal(char* a, char* b)
-      (c) void str_copy(char* s, char* copy)
-      (d) char* str_copy(char *s)
-      (e) int str_beginswith(char* str, char* start)
-      (f) int str_endswith(char* str, char* end)
-      (g) char* str_concat(char* str, char* addition)
-      (h) void str_lower(char* str)
-      (i) void str_upper(char* str)
-      (j) int str_isalpha(char* str)
-      (k) int str_isint(char* str)
-      (l) char* str_lstrip(char* str, char tostrip)
-      (m) char* str_rstrip(char* str, char tostrip)
-      (n) char* str_strip(char* str, char* tostrip)
-      (o) void str_sort(char* str)
-      (p) char** str_split(char* str, char c, int* size)
-      (q) int str_toint(char* str)
-      (r) char* str_inttostr(int num)
+      (c) char* str_copy(char *s)
+      (d) int str_beginswith(char* str, char* start)
+      (e) int str_endswith(char* str, char* end)
+      (f) char* str_concat(char* str, char* addition)
+      (g) void str_lower(char* str)
+      (h) void str_upper(char* str)
+      (i) int str_isalpha(char* str)
+      (j) int str_isint(char* str)
+      (k) char* str_lstrip(char* str, char tostrip)
+      (l) char* str_rstrip(char* str, char tostrip)
+      (m) char* str_strip(char* str, char* tostrip)
+      (n) void str_sort(char* str)
+      (o) char** str_split(char* str, char c, int* size)
+      (p) int str_toint(char* str)
+      (q) char* str_inttostr(int num)
 
    005.
    Dynamic array. 
@@ -88,8 +87,6 @@ typedef double f64;
 #define megabytes(value) (kilobytes(value)*1024)
 #define gigabytes(value) (megabytes(value)*1024)
 #define terabytes(value) (gigabytes(value)*1024)
-
-#define alloc(size) calloc(1, size) // calloc so memory is zeroed
 
 #ifdef DEBUG
 #define dbg(msg, ...) fprintf(stderr, "[DEBUG] (%s:%d) " msg "\n", \
@@ -380,17 +377,8 @@ int str_equal(char *a, char *b) {
   return ((*a == '\0') && (*b == '\0'));
 }
 
-// No overloading in C...
-//void str_copy(char *s, char *copy) {
-//     while(*s != '\0') {
-//          *copy = *s;
-//          s++, copy++;
-//     }
-//     *copy = '\0';
-//}
-
 char* str_copy(char *s) {
-  char* copy = (char*)alloc(sizeof(char)*(str_len(s)+1));
+  char* copy = (char*)xcalloc(1, sizeof(char)*(str_len(s)+1));
   char* copyPtr = copy;
   while(*s != '\0') {
     *copyPtr = *s;
@@ -421,7 +409,7 @@ int str_endswith(char* str, char* end) {
 
 char* str_concat(char* str, char* addition) {
     int newLength = str_len(str) + str_len(addition) + 1;
-    str = (char*)realloc(str, sizeof(char) * newLength);
+    str = (char*)xrealloc(str, sizeof(char) * newLength);
     char* strPtr = str;
     while(*strPtr != '\0') { strPtr++; }
     while(*addition != '\0') {
@@ -530,7 +518,7 @@ char** str_split(char* str, char c, int* size) {
     }
     strPtr++;
   }
-  char** result = (char**)alloc(sizeof(char*)*numStrs);
+  char** result = (char**)xcalloc(1, sizeof(char*)*numStrs);
   strPtr = str;
   int i = 0;
   while(numStrs > 0) {
@@ -583,7 +571,7 @@ char* str_inttostr(int num) {
       temp /= 10;
    }
 
-   char *res = (char *)alloc(sizeof(char) *
+   char *res = (char *)xcalloc(1, sizeof(char) *
                               (len + negative + 1)); // extra for '-' and '\0'
 
    char *resPtr = res;

@@ -208,7 +208,7 @@ int main() {
     assert(str_equal(found6, "This is a stored value!"));
     assert(foundStruct->a == 13 && foundStruct->b == 14);
 
-    for(int a = 0; a < 30000; a++) { // to test for memory leaks
+    for(int a = 0; a < 1000; a++) { // to test for memory leaks
         for(int i = 0; i < 10000; i++) {
             char *forLoopKey = str_inttostr(i);
             int *forLoopValue = xmalloc(sizeof(int));
