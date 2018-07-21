@@ -249,10 +249,13 @@ int main() {
             int *value = ht_search(t, key);
             free(key);
             if(i == testKey1 || i == testKey2 || i == testKey3) {
-                assert(value == 0);
+                assert(!value);
             }
             else { assert(i == *value); }
         }
+
+        assert(t->len * 2 < t->cap);
+        assert(t->cap <= 32768);
     }
 
     ht_free(t);

@@ -642,33 +642,31 @@ void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
 
 #if 1
 // 006. START
-typedef struct HtRecord {
-    char *key;
-    void *value;
-} HtRecord;
-
 typedef struct HashTable {
     u32 len;
     u32 cap;
-    HtRecord *buf;
+    char **keys;
+    void **values;
 } HashTable;
 
 HashTable *ht_create() {
-    HashTable *ht = xmalloc(sizeof(HashTable));;
+    HashTable *ht = xcalloc(1, sizeof(HashTable));
     ht->len = 0;
     ht->cap = 1024;
-    ht->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht->cap); // calloc to memset to zero
+    ht->keys = (char**)xcalloc(1, sizeof(char*) * ht->cap); // calloc to memset to zero
+    ht->values = (void**)xcalloc(1, sizeof(void*) * ht->cap); // calloc to memset to zero
     return ht;
 }
 
 void ht_free(HashTable *ht) {
     for(int i = 0; i < ht->cap; i++) {
-        if(ht->buf[i].key != 0) {
-            free(ht->buf[i].key);
-            free(ht->buf[i].value);
+        if(ht->keys[i]) {
+            free(ht->keys[i]);
+            free(ht->values[i]);
         }
     }
-    free(ht->buf);
+    free(ht->keys);
+    free(ht->values);
     free(ht);
 }
 
@@ -688,35 +686,40 @@ void ht_insert(HashTable *ht, char *key, void *value);
 void ht_grow(HashTable *ht) {
     int oldCap = ht->cap;
     ht->cap = ht->cap * 2;
-    HtRecord *oldBuf = ht->buf;
-    ht->buf = (HtRecord*)xcalloc(1, sizeof(HtRecord) * ht->cap); // calloc to memset to zero
-    ht->len = 0; //because the keys get reinserted
+    char **oldKeys = ht->keys;
+    void **oldValues = ht->values;
+    ht->keys = (char**)xcalloc(1, sizeof(char*) * ht->cap); // calloc to memset to zero
+    ht->values = (void**)xcalloc(1, sizeof(char*) * ht->cap); // calloc to memset to zero
+    ht->len = 0; // because ht_insert increments len
     for(int i = 0; i < oldCap; i++) {
-        if(oldBuf[i].value == 0) continue;
-        ht_insert(ht, oldBuf[i].key, oldBuf[i].value);
-        free(oldBuf[i].key);
+        if(!oldKeys[i]) { continue; }
+        else {
+            ht_insert(ht, oldKeys[i], oldValues[i]);
+            free(oldKeys[i]);
+        }
     }
-    free(oldBuf);
-    //dbg("Grown to %d", ht->cap);
+    free(oldKeys);
+    free(oldValues);
 }
 
 void ht_insert(HashTable *ht, char *key, void *value) {
-    assert(ht->buf);
+    assert(ht->keys);
+    assert(ht->values);
     if((ht->len + 1) * 2 >= ht->cap) {
         ht_grow(ht);
     }
 
     int index = ht_hash(ht, key);
     while(1) {
-        if(!ht->buf[index].key) {
-            ht->buf[index].key = str_copy(key);
-            ht->buf[index].value = value;
+        if(!ht->keys[index]) {
+            ht->keys[index] = str_copy(key);
+            ht->values[index] = value;
             ht->len++;
             return;
         // Overwrite existing values of the same key
-        } else if(str_equal(ht->buf[index].key, key)) {
-            free(ht->buf[index].value);
-            ht->buf[index].value = value;
+        } else if(str_equal(ht->keys[index], key)) {
+            free(ht->values[index]);
+            ht->values[index] = value;
             return;
         } else {
             index = (index + 1) % ht->cap;
@@ -725,13 +728,13 @@ void ht_insert(HashTable *ht, char *key, void *value) {
 }
 
 void *ht_search(HashTable *ht, char *key) {
-    assert(ht->buf);
-
+    assert(ht->keys);
+    assert(ht->values);
     u32 index = ht_hash(ht, key);
     while(1) {
-        if(ht->buf[index].key) {
-            if(str_equal(ht->buf[index].key, key)) {
-                return ht->buf[index].value;
+        if(ht->keys[index]) {
+            if(str_equal(ht->keys[index], key)) {
+                return ht->values[index];
             } else {
                 index = (index + 1) % ht->cap;
             }
@@ -744,20 +747,20 @@ void *ht_search(HashTable *ht, char *key) {
 void ht_delete(HashTable *ht, char *key) {
     u64 hash = ht_hash(ht, key);
     while(1) {
-        if(!ht->buf[hash].key) {
+        if(!ht->keys[hash]) {
             break;
-        } else if(str_equal(ht->buf[hash].key, key)) {
-            ht->buf[hash].key = 0;
-            free(ht->buf[hash].value);
-            ht->buf[hash].value = 0;
+        } else if(str_equal(ht->keys[hash], key)) {
+            ht->keys[hash] = 0;
+            free(ht->values[hash]);
+            ht->values[hash] = 0;
             ht->len--;
             // NOTE: Need to reinsert all records until the next empty slot
-            while(ht->buf[(hash + 1) % ht->cap].key) {
+            while(ht->keys[(hash + 1) % ht->cap]) {
                 hash = (hash + 1) % ht->cap;
-                char* tmpKey = ht->buf[hash].key;
-                void* tmpValue = ht->buf[hash].value;
-                ht->buf[hash].key = 0;
-                ht->buf[hash].value = 0;
+                char* tmpKey = ht->keys[hash];
+                void* tmpValue = ht->values[hash];
+                ht->keys[hash] = 0;
+                ht->values[hash] = 0;
                 ht_insert(ht, tmpKey, tmpValue);
                 free(tmpKey); // because insert mallocs for the key
                 ht->len--; // because insert increments len
