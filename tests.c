@@ -36,7 +36,9 @@ int main() {
 
     // Test 003.
     assert(mth_min(1, 2) == 1);
+    assert(mth_min(1, 1) == 1);
     assert(mth_max(1, 2) == 2);
+    assert(mth_max(2, 2) == 2);
 
 
     // Test 004.
@@ -47,12 +49,15 @@ int main() {
     assert(str_equal("123", "123"));
     assert(!str_equal("123", "1234"));
     assert(!str_equal("12345", "1234"));
+    assert(!str_equal("12345", "2345"));
 
     char *str = "a string";
     char *copy = str_copy(str);
-    copy[0] = 'a';
-    copy[1] = ' ';
     assert(str_equal(str, copy));
+    copy[0] = ' ';
+    assert(!str_equal(str, copy));
+    copy[0] = '\0';
+    assert(!str_equal(str, copy));
     free(copy);
 
     assert(str_beginswith(str, "a stri"));

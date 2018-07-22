@@ -1,66 +1,66 @@
 /*
-   lib-mmy.h
+    lib-mmy.h
 
-   000. 
-      (a) Typedefs
-      (b) Useful macros
-      (c) Assert/Debug macros
-      (d) Logging macros
+    000. 
+    (a) Typedefs
+    (b) Useful macros
+    (c) Assert/Debug macros
+    (d) Logging macros
 
-   001.
-      (a) void xmemset(unsigned char *ptr, unsigned char value, u64 size)
-      (b) void xmemcpy(unsigned char *dst, unsigned char *src, u64 size)
-      (c) void* xmalloc(size_t num_bytes)
-      (d) void* xcalloc(size_t nitems, size_t num_bytes)
-      (e) void* xrealloc(void *ptr, size_t num_bytes)
+    001.
+    (a) void xmemset(unsigned char *ptr, unsigned char value, u64 size)
+    (b) void xmemcpy(unsigned char *dst, unsigned char *src, u64 size)
+    (c) void* xmalloc(size_t num_bytes)
+    (d) void* xcalloc(size_t nitems, size_t num_bytes)
+    (e) void* xrealloc(void *ptr, size_t num_bytes)
 
-   002. 
-   Copied from https://github.com/nothings/stb/ (public domain). 
-   Uses Meresenne Twister and LCG to seed. Changed so automatically 
-   seeded with time(NULL) if srand() hasn't been called.
-   (a) seeds the random number generator. 
-   (b) returns a random number between 0 and ULONG_MAX. 
-   (c) returns a random number between 0 and 1. 
-      (a) unsigned long stb_srand(unsigned long seed)
-      (b) unsigned long stb_rand()
-      (c) double stb_frand()
+    002. 
+    Copied from https://github.com/nothings/stb/ (public domain). 
+    Uses Meresenne Twister and LCG to seed. Changed so automatically 
+    seeded with time(NULL) if srand() hasn't been called.
+    (a) seeds the random number generator. 
+    (b) returns a random number between 0 and ULONG_MAX. 
+    (c) returns a random number between 0 and 1. 
+    (a) unsigned long stb_srand(unsigned long seed)
+    (b) unsigned long stb_rand()
+    (c) double stb_frand()
 
-   003.
-   Math operations. a,b use intrinsics. c,d,e: 
-   https://graphics.stanford.edu/%7Eseander/bithacks.html
-      (a) float mth_sqrt(float input)
-      (b) double mth_sqrt(double input)
-      (c) int mth_min(int a, int b)
-      (d) int mth_max(int a, int b)
-      (e) int mth_abs(int a)
-      (f) int mth_pow(int num, int pow)
-
-   004. 
-   ANSI string operations.
-      (a) int str_len(char* str)
-      (b) int str_equal(char* a, char* b)
-      (c) char* str_copy(char *s)
-      (d) int str_beginswith(char* str, char* start)
-      (e) int str_endswith(char* str, char* end)
-      (f) char* str_concat(char* str, char* addition)
-      (g) void str_lower(char* str)
-      (h) void str_upper(char* str)
-      (i) int str_isalpha(char* str)
-      (j) int str_isint(char* str)
-      (k) char* str_lstrip(char* str, char tostrip)
-      (l) char* str_rstrip(char* str, char tostrip)
-      (m) char* str_strip(char* str, char* tostrip)
-      (n) void str_sort(char* str)
-      (o) char** str_split(char* str, char c, int* size)
-      (p) int str_toint(char* str)
-      (q) char* str_inttostr(int num)
-
-   005.
-   Dynamic array. 
-   Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
-
-   006.
-   Hash table.
+    003.
+    Math operations. a,b use intrinsics. c,d,e: 
+    https://graphics.stanford.edu/%7Eseander/bithacks.html
+    (a) float mth_sqrt(float input)
+    (b) double mth_sqrt(double input)
+    (c) int mth_min(int a, int b)
+    (d) int mth_max(int a, int b)
+    (e) int mth_abs(int a)
+    (f) int mth_pow(int num, int pow)
+    
+    004. 
+    ANSI string operations.
+    (a) int str_len(char* str)
+    (b) int str_equal(char* a, char* b)
+    (c) char* str_copy(char *s)
+    (d) int str_beginswith(char* str, char* start)
+    (e) int str_endswith(char* str, char* end)
+    (f) char* str_concat(char* str, char* addition)
+    (g) void str_lower(char* str)
+    (h) void str_upper(char* str)
+    (i) int str_isalpha(char* str)
+    (j) int str_isint(char* str)
+    (k) char* str_lstrip(char* str, char tostrip)
+    (l) char* str_rstrip(char* str, char tostrip)
+    (m) char* str_strip(char* str, char* tostrip)
+    (n) void str_sort(char* str)
+    (o) char** str_split(char* str, char c, int* size)
+    (p) int str_toint(char* str)
+    (q) char* str_inttostr(int num)
+    
+    005.
+    Dynamic array. 
+    Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
+    
+    006.
+    Hash table.
 
 */
 
@@ -90,7 +90,7 @@ typedef double f64;
 
 #ifdef DEBUG
 #define dbg(msg, ...) fprintf(stderr, "[DEBUG] (%s:%d) " msg "\n", \
-                              __FILE__, __LINE__, ##__VA_ARGS__)
+        __FILE__, __LINE__, ##__VA_ARGS__)
 #define assert(expr) if(!(expr)) { dbg("Assert failed: " #expr); *(int*)0 = 0; }
 #else 
 #define dbg(msg, ...)
@@ -98,11 +98,11 @@ typedef double f64;
 #endif
 
 #define log_err(msg, ...) fprintf(stderr, "[ERROR] (%s:%d) " msg "\n", \
-                                  __FILE__, __LINE__, ##__VA_ARGS__) 
+        __FILE__, __LINE__, ##__VA_ARGS__) 
 #define log_warn(msg, ...) fprintf(stderr, "[WARN] (%s:%d) " msg "\n", \
-                                   __FILE__, __LINE__, ##__VA_ARGS__)
+        __FILE__, __LINE__, ##__VA_ARGS__)
 #define log_info(msg, ...) fprintf(stderr, "[INFO] (%s:%d) " msg "\n", \
-                                   __FILE__, __LINE__, ##__VA_ARGS__)
+        __FILE__, __LINE__, ##__VA_ARGS__)
 
 #endif
 // 000. END
@@ -111,18 +111,18 @@ typedef double f64;
 #if 1
 #include <stdlib.h> // for malloc, realloc, calloc
 void xmemset(unsigned char *ptr, unsigned char value, u64 size) {
-   for(u64 i = 0; i < size; i++) {
-      *ptr = value;
-      ptr++;
-   }
+    for(u64 i = 0; i < size; i++) {
+        *ptr = value;
+        ptr++;
+    }
 }
 
 void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
-   while(size > 0) {
-      *dst = *src;
-      src++, dst++;
-      size--;
-   }
+    while(size > 0) {
+        *dst = *src;
+        src++, dst++;
+        size--;
+    }
 }
 
 void *xmalloc(size_t num_bytes) {
@@ -165,72 +165,72 @@ typedef struct { char d[8]; } stb__8;
 // optimize the small cases, though you shouldn't be calling this for those!
 void stb_swap(void *p, void *q, size_t sz)
 {
-   char buffer[256];
-   if (p == q) return;
-   if (sz == 4) {
-      stb__4 temp    = * ( stb__4 *) p;
-      * (stb__4 *) p = * ( stb__4 *) q;
-      * (stb__4 *) q = temp;
-      return;
-   } else if (sz == 8) {
-      stb__8 temp    = * ( stb__8 *) p;
-      * (stb__8 *) p = * ( stb__8 *) q;
-      * (stb__8 *) q = temp;
-      return;
-   }
+    char buffer[256];
+    if (p == q) return;
+    if (sz == 4) {
+        stb__4 temp    = * ( stb__4 *) p;
+        * (stb__4 *) p = * ( stb__4 *) q;
+        * (stb__4 *) q = temp;
+        return;
+    } else if (sz == 8) {
+        stb__8 temp    = * ( stb__8 *) p;
+        * (stb__8 *) p = * ( stb__8 *) q;
+        * (stb__8 *) q = temp;
+        return;
+    }
 
-   while (sz > sizeof(buffer)) {
-      stb_swap(p, q, sizeof(buffer));
-      p = (char *) p + sizeof(buffer);
-      q = (char *) q + sizeof(buffer);
-      sz -= sizeof(buffer);
-   }
+    while (sz > sizeof(buffer)) {
+        stb_swap(p, q, sizeof(buffer));
+        p = (char *) p + sizeof(buffer);
+        q = (char *) q + sizeof(buffer);
+        sz -= sizeof(buffer);
+    }
 
-   xmemcpy(buffer, p     , sz);
-   xmemcpy(p     , q     , sz);
-   xmemcpy(q     , buffer, sz);
+    xmemcpy(buffer, p     , sz);
+    xmemcpy(p     , q     , sz);
+    xmemcpy(q     , buffer, sz);
 }
 
 static unsigned long stb__rand_seed=0;
 
 unsigned long stb_srandLCG(unsigned long seed)
 {
-   unsigned long previous = stb__rand_seed;
-   stb__rand_seed = seed;
-   return previous;
+    unsigned long previous = stb__rand_seed;
+    stb__rand_seed = seed;
+    return previous;
 }
 
 unsigned long stb_randLCG(void)
 {
-   stb__rand_seed = stb__rand_seed * 2147001325 + 715136305; // BCPL generator
-   // shuffle non-random bits to the middle, and xor to decorrelate with seed
-   return 0x31415926 ^ ((stb__rand_seed >> 16) + (stb__rand_seed << 16));
+    stb__rand_seed = stb__rand_seed * 2147001325 + 715136305; // BCPL generator
+    // shuffle non-random bits to the middle, and xor to decorrelate with seed
+    return 0x31415926 ^ ((stb__rand_seed >> 16) + (stb__rand_seed << 16));
 }
 
 void stb_shuffle(void *p, size_t n, size_t sz, unsigned long seed)
 {
-   char *a;
-   unsigned long old_seed;
-   int i;
-   if (seed)
-      old_seed = stb_srandLCG(seed);
-   a = (char *) p + (n-1) * sz;
+    char *a;
+    unsigned long old_seed;
+    int i;
+    if (seed)
+        old_seed = stb_srandLCG(seed);
+    a = (char *) p + (n-1) * sz;
 
-   for (i=n; i > 1; --i) {
-      int j = stb_randLCG() % i;
-      stb_swap(a, (char *) p + j * sz, sz);
-      a -= sz;
-   }
-   if (seed)
-      stb_srandLCG(old_seed);
+    for (i=n; i > 1; --i) {
+        int j = stb_randLCG() % i;
+        stb_swap(a, (char *) p + j * sz, sz);
+        a -= sz;
+    }
+    if (seed)
+        stb_srandLCG(old_seed);
 }
 
 void stb_reverse(void *p, size_t n, size_t sz)
 {
-   int i,j = n-1;
-   for (i=0; i < j; ++i,--j) {
-      stb_swap((char *) p + i * sz, (char *) p + j * sz, sz);
-   }
+    int i,j = n-1;
+    for (i=0; i < j; ++i,--j) {
+        stb_swap((char *) p + i * sz, (char *) p + j * sz, sz);
+    }
 }
 
 // public domain Mersenne Twister by Michael Brundage
@@ -243,14 +243,14 @@ int srandcalled = 0;
 
 void stb_srand(unsigned long seed)
 {
-   srandcalled = 1;
+    srandcalled = 1;
 
-   int i;
-   unsigned long old = stb_srandLCG(seed);
-   for (i = 0; i < STB__MT_LEN; i++)
-      stb__mt_buffer[i] = stb_randLCG();
-   stb_srandLCG(old);
-   stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
+    int i;
+    unsigned long old = stb_srandLCG(seed);
+    for (i = 0; i < STB__MT_LEN; i++)
+        stb__mt_buffer[i] = stb_randLCG();
+    stb_srandLCG(old);
+    stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
 }
 
 #define STB__MT_IA           397
@@ -263,46 +263,46 @@ void stb_srand(unsigned long seed)
 
 unsigned long stb_rand()
 {
-   if(!srandcalled) stb_srand(time(NULL));
+    if(!srandcalled) stb_srand(time(NULL));
 
-   unsigned long * b = stb__mt_buffer;
-   int idx = stb__mt_index;
-   unsigned long s,r;
-   int i;
-	
-   if (idx >= STB__MT_LEN*sizeof(unsigned long)) {
-      if (idx > STB__MT_LEN*sizeof(unsigned long))
-         stb_srand(0);
-      idx = 0;
-      i = 0;
-      for (; i < STB__MT_IB; i++) {
-         s = STB__TWIST(b, i, i+1);
-         b[i] = b[i + STB__MT_IA] ^ (s >> 1) ^ STB__MAGIC(s);
-      }
-      for (; i < STB__MT_LEN-1; i++) {
-         s = STB__TWIST(b, i, i+1);
-         b[i] = b[i - STB__MT_IB] ^ (s >> 1) ^ STB__MAGIC(s);
-      }
-      
-      s = STB__TWIST(b, STB__MT_LEN-1, 0);
-      b[STB__MT_LEN-1] = b[STB__MT_IA-1] ^ (s >> 1) ^ STB__MAGIC(s);
-   }
-   stb__mt_index = idx + sizeof(unsigned long);
-   
-   r = *(unsigned long *)((unsigned char *)b + idx);
-   
-   r ^= (r >> 11);
-   r ^= (r << 7) & 0x9D2C5680;
-   r ^= (r << 15) & 0xEFC60000;
-   r ^= (r >> 18);
-   
-   return r;
+    unsigned long * b = stb__mt_buffer;
+    int idx = stb__mt_index;
+    unsigned long s,r;
+    int i;
+
+    if (idx >= STB__MT_LEN*sizeof(unsigned long)) {
+        if (idx > STB__MT_LEN*sizeof(unsigned long))
+            stb_srand(0);
+        idx = 0;
+        i = 0;
+        for (; i < STB__MT_IB; i++) {
+            s = STB__TWIST(b, i, i+1);
+            b[i] = b[i + STB__MT_IA] ^ (s >> 1) ^ STB__MAGIC(s);
+        }
+        for (; i < STB__MT_LEN-1; i++) {
+            s = STB__TWIST(b, i, i+1);
+            b[i] = b[i - STB__MT_IB] ^ (s >> 1) ^ STB__MAGIC(s);
+        }
+
+        s = STB__TWIST(b, STB__MT_LEN-1, 0);
+        b[STB__MT_LEN-1] = b[STB__MT_IA-1] ^ (s >> 1) ^ STB__MAGIC(s);
+    }
+    stb__mt_index = idx + sizeof(unsigned long);
+
+    r = *(unsigned long *)((unsigned char *)b + idx);
+
+    r ^= (r >> 11);
+    r ^= (r << 7) & 0x9D2C5680;
+    r ^= (r << 15) & 0xEFC60000;
+    r ^= (r >> 18);
+
+    return r;
 }
 
 double stb_frand(void)
 {
-   return (double) stb_rand() / ((double) ULONG_MAX);
-   //return (double) stb_rand() / ((double) (1 << 16) * (1 << 16)); // NOTE: This stopped working?
+    return (double) stb_rand() / ((double) ULONG_MAX);
+    //return (double) stb_rand() / ((double) (1 << 16) * (1 << 16)); // NOTE: This stopped working?
 }
 #endif
 // 002. END
@@ -327,7 +327,7 @@ double mth_sqrt(double input) {
     __m128d two = _mm_sqrt_pd(one); // SSE2
     result = _mm_cvtsd_f64(two);
 
-     return result;
+    return result;
 }
 
 int mth_min(int a, int b) {
@@ -343,9 +343,9 @@ int mth_max(int a, int b) {
 }
 
 int mth_abs(int a) {
-     unsigned int result;
-     int const mask = a >> sizeof(int) * 8 - 1;
-     result = (a + mask) ^ mask;
+    unsigned int result;
+    int const mask = a >> sizeof(int) * 8 - 1;
+    result = (a + mask) ^ mask;
 
     return result;
 }
@@ -364,39 +364,41 @@ int mth_pow(int num, int pow) {
 // 004. START
 #if 1
 int str_len(char *str) {
-     char* ptr = str;
-     while(*ptr != '\0')
-          ptr++;
-     return ptr - str;
+    char* ptr = str;
+    while(*ptr != '\0')
+        ptr++;
+    return ptr - str;
 }
 
 int str_equal(char *a, char *b) {
-  while((*a != '\0') && (*a == *b)) {
-    a++, b++;
-  }
-  return ((*a == '\0') && (*b == '\0'));
+    while((*a != '\0') && (*b != '\0') && (*a == *b)) {
+        a++, b++;
+    }
+    return ((*a == '\0') && (*b == '\0'));
 }
 
 char* str_copy(char *s) {
-  char* copy = (char*)xcalloc(1, sizeof(char)*(str_len(s)+1));
-  char* copyPtr = copy;
-  while(*s != '\0') {
-    *copyPtr = *s;
-    s++, copyPtr++;
-  }
-  *copyPtr = '\0';
-  return copy;
+    char* copy = (char*)xmalloc(sizeof(char)*(str_len(s)+1));
+    char* copyPtr = copy;
+    while(*s != '\0') {
+        *copyPtr = *s;
+        s++, copyPtr++;
+    }
+    *copyPtr = '\0';
+    return copy;
 }
 
 int str_beginswith(char* str, char* start) {
-  while((*start != '\0') && (*start == *str)) {
-    start++, str++;
-  }
-  return *start == '\0';
+    assert(str_len(start) <= str_len(str));
+    while((*start != '\0') && (*start == *str)) {
+        start++, str++;
+    }
+    return *start == '\0';
 }
 
 int str_endswith(char* str, char* end) {
     int endLength = str_len(end);
+    assert(endLength <= str_len(str));
     while(*end != '\0') { end++; }
     while(*str != '\0') { str++; }
 
@@ -421,178 +423,178 @@ char* str_concat(char* str, char* addition) {
 }
 
 void str_lower(char* str) {
-  while(*str != '\0') {
-    if(*str >= 'A' && *str <= 'Z') {
-      *str += 'a' - 'A';
+    while(*str != '\0') {
+        if(*str >= 'A' && *str <= 'Z') {
+            *str += 'a' - 'A';
+        }
+        str++;
     }
-    str++;
-  }
 }
 
 void str_upper(char* str) {
-  while(*str != '\0') {
-    if(*str >= 'a' && *str <= 'z') {
-      *str -= 'a' - 'A';
+    while(*str != '\0') {
+        if(*str >= 'a' && *str <= 'z') {
+            *str -= 'a' - 'A';
+        }
+        str++;
     }
-    str++;
-  }
 }
 
 int str_isalpha(char* str) {
-   while(*str != '\0') {
-      if((*str < 'a' || *str > 'z') && (*str < 'A' || *str > 'Z')) {
-         return 0;
-      }
-      str++;
-   }
-   return 1;
+    while(*str != '\0') {
+        if((*str < 'a' || *str > 'z') && (*str < 'A' || *str > 'Z')) {
+            return 0;
+        }
+        str++;
+    }
+    return 1;
 }
 
 int str_isint(char* str) {
-   if(*str == '-') {
-      str++;
-   }
-   while(*str != '\0') {
-      if(*str < '0' || *str > '9') {
-         return 0;
-      }
-      str++;
-   }
-   return 1;
+    if(*str == '-') {
+        str++;
+    }
+    while(*str != '\0') {
+        if(*str < '0' || *str > '9') {
+            return 0;
+        }
+        str++;
+    }
+    return 1;
 }
 
 char* str_lstrip(char* str, char tostrip) {
-   while(*str == tostrip) {
-      str++;
-   }
-   return str;
+    assert(tostrip != '\0');
+    while(*str == tostrip) {
+        str++;
+    }
+    return str;
 }
 
 char* str_rstrip(char* str, char tostrip) {
-   assert(str_len(str) > 0);
-   char* strPtr = str;
-   while(strPtr[1] != '\0') {
-      strPtr++;
-   }
-   while(*strPtr == tostrip) {
-      *strPtr = '\0';
-      strPtr--;
-   }
-   return str;
+    assert(tostrip != '\0');
+    if(*str == '\0') return str;
+    char* strPtr = str;
+    while(*strPtr != '\0') {
+        strPtr++;
+    }
+    strPtr--;
+    while(*strPtr == tostrip) {
+        *strPtr = '\0';
+        strPtr--;
+    }
+    return str;
 }
 
 char* str_strip(char* str, char* tostrip) {
-   assert(str_len(str) > 0);
-   int strippedSomething = 1;
-   while(strippedSomething) {
-      int length = str_len(str);
-      for(int i = 0; i < str_len(tostrip); i++) {
-         str = str_lstrip(str, tostrip[i]);
-         str = str_rstrip(str, tostrip[i]);
-      }
-      strippedSomething = (length != str_len(str));
-   }
-   return str;
+    while(1) {
+        int length = str_len(str);
+        for(int i = 0; i < str_len(tostrip); i++) {
+            str = str_lstrip(str, tostrip[i]);
+            str = str_rstrip(str, tostrip[i]);
+        }
+        if(length == str_len(str)) return str;
+    }
 }
 
 void str_sort(char* str) {
-   int len = str_len(str);
-   for(int i = 0; i < len; i++) {
-      for(int j = i+1; j < len; j++) {
-         if(str[i] > str[j]) {
-            char temp = str[i];
-            str[i] = str[j];
-            str[j] = temp;
-         }
-      }
-   }
+    int len = str_len(str);
+    for(int i = 0; i < len; i++) {
+        for(int j = i+1; j < len; j++) {
+            if(str[i] > str[j]) {
+                char temp = str[i];
+                str[i] = str[j];
+                str[j] = temp;
+            }
+        }
+    }
 }
 
 char** str_split(char* str, char c, int* size) {
-  int numStrs = 1;
-  char* strPtr = str;
-  while(*strPtr != '\0') {
-    if(*strPtr == c) {
-      *strPtr = '\0';
-      numStrs++;
+    int numStrs = 1;
+    char* strPtr = str;
+    while(*strPtr != '\0') {
+        if(*strPtr == c) {
+            *strPtr = '\0';
+            numStrs++;
+        }
+        strPtr++;
     }
-    strPtr++;
-  }
-  char** result = (char**)xcalloc(1, sizeof(char*)*numStrs);
-  strPtr = str;
-  int i = 0;
-  while(numStrs > 0) {
-    if(*strPtr == '\0') {
-      numStrs--;
-      result[i] = str;
-      str = strPtr + 1;
-      i++;
+    char** result = (char**)xmalloc(sizeof(char*)*numStrs);
+    strPtr = str;
+    int i = 0;
+    while(numStrs > 0) {
+        if(*strPtr == '\0') {
+            numStrs--;
+            result[i] = str;
+            str = strPtr + 1;
+            i++;
+        }
+        strPtr++;
     }
-    strPtr++;
-  }
-  *size = i;
-  return result;
+    *size = i;
+    return result;
 }
 
 int str_toint(char *str) {
-   int result = 0;
-   char *strPtr = str;
+    int result = 0;
+    char *strPtr = str;
 
-   int length = str_len(str);
+    int length = str_len(str);
 
-   while (length > 0) {
-      assert((*strPtr >= '0' && *strPtr <= '9') || (length == str_len(str) && *strPtr == '-'));
-      length--;
-      if(*strPtr == '-') { strPtr++; continue; }
+    while (length > 0) {
+        assert((*strPtr >= '0' && *strPtr <= '9') || (length == str_len(str) && *strPtr == '-'));
+        length--;
+        if(*strPtr == '-') { strPtr++; continue; }
 
-      // Calculate value based on position (i.e. value * 10^position)
-      int exponent = 1;
-      for (int i = 0; i < length; i++) {
-         exponent *= 10;
-      }
-      result += (*strPtr - 48) * exponent;
-      strPtr++;
-   }
-   if (str[0] == '-') { result = -result; }
-   return result;
+        // Calculate value based on position (i.e. value * 10^position)
+        int exponent = 1;
+        for (int i = 0; i < length; i++) {
+            exponent *= 10;
+        }
+        result += (*strPtr - 48) * exponent;
+        strPtr++;
+    }
+    if (str[0] == '-') { result = -result; }
+    return result;
 }
 
 char* str_inttostr(int num) {
-   int negative = 0;
-   if (num < 0) {
-      negative = 1;
-      num = -num;
-   }
+    int negative = 0;
+    if (num < 0) {
+        negative = 1;
+        num = -num;
+    }
 
-   int len = 1;
-   int temp = num;
-   while (temp >= 10) {
-      len++;
-      temp /= 10;
-   }
+    int len = 1;
+    int temp = num;
+    while (temp >= 10) {
+        len++;
+        temp /= 10;
+    }
 
-   char *res = (char *)xcalloc(1, sizeof(char) *
-                              (len + negative + 1)); // extra for '-' and '\0'
+    char *res = (char *)xmalloc(sizeof(char) *
+            (len + negative + 1)); // len + '-' + '\0'
 
-   char *resPtr = res;
-   if (negative) {
-      *resPtr = '-';
-      resPtr++;
-   }
-   while (len > 0) {
-      int mod = 1;
-      int templen = len;
-      while (templen > 0) {
-         mod *= 10;
-         templen--;
-      }
-      *resPtr = '0' + ((num % mod) / (mod / 10)); // isolate wanted digit
-      resPtr++;
-      len--;
-   }
+    char *resPtr = res;
+    if (negative) {
+        *resPtr = '-';
+        resPtr++;
+    }
+    while (len > 0) {
+        int mod = 1;
+        int templen = len;
+        while (templen > 0) {
+            mod *= 10;
+            templen--;
+        }
+        *resPtr = '0' + ((num % mod) / (mod / 10)); // isolate wanted digit
+        resPtr++;
+        len--;
+    }
 
-   *resPtr = '\0';
-   return res;
+    *resPtr = '\0';
+    return res;
 }
 #endif
 // 004. END
@@ -600,8 +602,7 @@ char* str_inttostr(int num) {
 #if 1
 // 005. START
 #define offsetof(st, m) ((size_t)&(((st *)0)->m))
-#define MAX(x, y) ((x) >= (y) ? (x) : (y))
-#define CLAMP_MIN(x, min) MAX(x, min)
+#define CLAMP_MIN(x, min) mth_max(x, min)
 
 typedef struct ArrHdr {
     size_t len;
@@ -623,7 +624,7 @@ typedef struct ArrHdr {
 
 void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
     assert(arr_cap(buf) <= (SIZE_MAX - 1)/2);
-    size_t new_cap = CLAMP_MIN(2*arr_cap(buf), MAX(new_len, 16));
+    size_t new_cap = CLAMP_MIN(2*arr_cap(buf), mth_max(new_len, 16));
     assert(new_len <= new_cap);
     assert(new_cap <= (SIZE_MAX - offsetof(ArrHdr, buf))/elem_size);
     size_t new_size = offsetof(ArrHdr, buf) + new_cap*elem_size;
@@ -677,7 +678,7 @@ int ht_hash(HashTable *ht, char *key) {
     while(c = *key++) {
         hash = ((hash << 5) + hash) + c; // hash * 33 + c
     }
-    
+
     return hash % ht->cap;
 }
 
@@ -716,7 +717,7 @@ void ht_insert(HashTable *ht, char *key, void *value) {
             ht->values[index] = value;
             ht->len++;
             return;
-        // Overwrite existing values of the same key
+            // Overwrite existing values of the same key
         } else if(str_equal(ht->keys[index], key)) {
             free(ht->values[index]);
             ht->values[index] = value;
