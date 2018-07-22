@@ -454,6 +454,7 @@ int str_isint(char* str) {
     if(*str == '-') {
         str++;
     }
+    if(*str == '0' || *str == '\0') return 0; // shouldn't begin with 0 or have no digits
     while(*str != '\0') {
         if(*str < '0' || *str > '9') {
             return 0;

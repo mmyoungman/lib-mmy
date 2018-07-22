@@ -58,8 +58,11 @@ int main() {
     assert(!str_equal(str, copy));
     copy[0] = '\0';
     assert(!str_equal(str, copy));
+    str = "\0 string";
+    assert(str_equal(str, copy));
     free(copy);
 
+    str = "a string";
     assert(str_beginswith(str, "a stri"));
     assert(str_endswith(str, "tring"));
 
@@ -71,11 +74,15 @@ int main() {
     str = str_copy("SHoUT");
     str_lower(str);
     assert(str_equal(str, "shout"));
+    str_upper(str);
+    assert(str_equal(str, "SHOUT"));
     free(str);
 
     str = str_copy("quIet");
     str_upper(str);
     assert(str_equal(str, "QUIET"));
+    str_lower(str);
+    assert(str_equal(str, "quiet"));
     free(str);
 
     str = str_copy("aaalksfjnhekwjbegjabwegij");
@@ -84,9 +91,20 @@ int main() {
     assert(!str_isalpha(str));
     free(str);
 
-    str = str_copy("-190572985672019359876298");
+    str = "12345";
     assert(str_isint(str));
-    free(str);
+    str = "-190572985672019359876298";
+    assert(str_isint(str));
+    str = " 093120";
+    assert(!str_isint(str));
+    str = "-3095-409373";
+    assert(!str_isint(str));
+    str = "-3095409373-";
+    assert(!str_isint(str));
+    str = "-";
+    assert(!str_isint(str));
+    str = "-0101";
+    assert(!str_isint(str));
 
     str = str_copy("eeeeeeeeeeeklhgfgh         ");
     assert(str_equal(str_rstrip(str, ' '), "eeeeeeeeeeeklhgfgh"));
@@ -95,6 +113,10 @@ int main() {
 
     str = str_copy("(),(abc),");
     assert(str_equal(str_strip(str, "(),"), "abc"));
+    free(str);
+
+    str = str_copy(",((),(abc),");
+    assert(str_equal(str_strip(str, "(,"), "),(abc)"));
     free(str);
 
     str = str_copy("agfecbd");
@@ -107,7 +129,13 @@ int main() {
     char** split = str_split(str, ':', &size);
     assert(size == 11);
     assert(str_equal(split[0], "This"));
+    assert(str_equal(split[1], "Is"));
+    assert(str_equal(split[2], ""));
+    assert(str_equal(split[3], "A"));
+    assert(str_equal(split[4], "Test"));
     assert(str_equal(split[5], "To"));
+    assert(str_equal(split[6], "Use"));
+    assert(str_equal(split[7], "With"));
     assert(str_equal(split[8], "Split"));
     assert(str_equal(split[9], ""));
     assert(str_equal(split[10], ""));
@@ -115,8 +143,20 @@ int main() {
     assert(str_toint("1234") == 1234);
     assert(str_toint("-12345") == -12345);
 
+    str = str_inttostr(1234);
+    assert(str_equal(str, "1234"));
+    free(str);
+    
+    str = str_inttostr(-1234);
+    assert(str_equal(str, "-1234"));
+    free(str);
+    
+    str = str_inttostr(-12349876);
+    assert(str_equal(str, "-12349876"));
+    free(str);
+    
     // Have a version of assert for things that should break?
-    // shouldBreak(str_toint("12-12"));
+    // shouldAssert(str_toint("12-12"));
 
 
     // 005. Tests
@@ -179,7 +219,6 @@ int main() {
     *newValue3b = 15;
     ht_insert(t, "wawaweewah", newValue3a);
     assert(t->len == 3);
-
     ht_insert(t, "wawaweewah", newValue3b);
     assert(t->len == 3);
 
@@ -187,11 +226,22 @@ int main() {
     assert(t->len == 4);
 
     int *found = ht_search(t, "by the power of grayskull");
+    assert(*found == 10);
+
     int *found2 = ht_search(t, "this is a test key");
+    assert(*found2 == 11);
+
     int *found3 = ht_search(t, "this is another test key");
+    assert(found3 == 0);
+
     int *found4 = ht_search(t, "key");
+    assert(found4 == 0);
+
     int *found5 = ht_search(t, "wawaweewah");
+    assert(*found5 == 15);
+
     char *found6 = ht_search(t, "stringkey");
+    assert(str_equal(found6, "This is a stored value!"));
 
     typedef struct TestStruct {
         int a;
@@ -204,13 +254,6 @@ int main() {
     ht_insert(t, "test-struct", testStruct);
     assert(t->len == 5);
     TestStruct *foundStruct = ht_search(t, "test-struct");
-
-    assert(*found == 10);
-    assert(*found2 == 11);
-    assert(found3 == 0);
-    assert(found4 == 0);
-    assert(*found5 == 15);
-    assert(str_equal(found6, "This is a stored value!"));
     assert(foundStruct->a == 13 && foundStruct->b == 14);
 
     for(int a = 0; a < 1000; a++) { // to test for memory leaks
