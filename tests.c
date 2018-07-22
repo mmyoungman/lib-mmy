@@ -139,6 +139,15 @@ int main() {
     assert(str_equal(split[8], "Split"));
     assert(str_equal(split[9], ""));
     assert(str_equal(split[10], ""));
+    free(str);
+    free(split);
+
+    str = str_copy("Waa!");
+    split = str_split(str, ':', &size); 
+    assert(size == 1);
+    assert(str_equal(split[0], "Waa!"));
+    free(str);
+    free(split);
 
     assert(str_toint("1234") == 1234);
     assert(str_toint("-12345") == -12345);
