@@ -794,49 +794,106 @@ void ht_delete(HashTable *ht, char *key) {
 // 006. END
 #endif
 
-#if 0
+#if 1
 // 007. START
 
+#ifdef MEM_DEBUG
 typedef struct AllocRecord {
     void *ptr;
     u32 size;
     char *file;
     u32 line;
+    int freed;
+    char* freeFile;
+    int freeLine;
 } AllocRecord;
 
 AllocRecord *allocRecords = 0;
 
-void mem_alloc_instance(void *ptr, u32 size, char *file, u32 line) {
-}
-
 void *mem_malloc(u32 size, char *file, u32 line) {
     void *ptr = malloc(size);
-    AllocRecord *ar; 
-    ar = malloc(sizeof(*ar));
-    ar->ptr = ptr;
-    ar->size = size;
-    ar->file = str_copy(file);
-    ar->line = line;
+    if (!ptr) {
+        perror("mem_malloc failed");
+        exit(1);
+    }
+
+    AllocRecord ar; 
+    //ar = malloc(sizeof(ar));
+    ar.ptr = ptr;
+    ar.size = size;
+    ar.file = str_copy(file);
+    ar.line = line;
+    ar.freed = 0;
+    ar.freeFile = 0;
+    ar.freeLine = 0;
+    arr_push(allocRecords, ar);
         
     return ptr;
 }
 
-void *mem_calloc(u32 num, u32 size) {
+void *mem_calloc(u32 num, u32 size, char* file, int line) {
     void *ptr = calloc(num, size);
+    if (!ptr) {
+        perror("mem_calloc failed");
+        exit(1);
+    }
+
+    AllocRecord ar; 
+    //ar = malloc(sizeof(ar));
+    ar.ptr = ptr;
+    ar.size = num * size;
+    ar.file = str_copy(file);
+    ar.line = line;
+    ar.freed = 0;
+    ar.freeFile = 0;
+    ar.freeLine = 0;
+    arr_push(allocRecords, ar);
+        
     return ptr;
 }
 
-void *mem_realloc(void *ptr, u32 size) {
-    void *res = realloc(ptr, size);
-    return res;
+void *mem_realloc(void *ptr, u32 size, char* file, int line) {
+    for(int i = 0; i < arr_len(allocRecords); i++) {
+        if(allocRecords[i].ptr == ptr) {
+            allocRecords[i].size = size;
+            free(allocRecords[i].file);
+            allocRecords[i].file = str_copy(file);
+            allocRecords[i].line = line;
+
+            void *res = realloc(ptr, size);
+            if (!ptr) {
+                perror("mem_realloc failed");
+                exit(1);
+            }
+
+            allocRecords[i].ptr = res;
+
+            return res;
+        }
+    }
+
 }
 
-void mem_free(void *ptr) {
-    free(ptr);
+void mem_free(void *ptr, char* file, int line) {
+    for(int i = 0; i < arr_len(allocRecords); i++) {
+        if(allocRecords[i].ptr == ptr) {
+            if(allocRecords[i].freed == 0) { 
+                allocRecords[i].freed = 1;
+                allocRecords[i].freeFile = str_copy(file);
+                allocRecords[i].freeLine = line;
+                free(ptr);
+                break;
+            }
+            else {
+                log_err("xfree at %s:%d was already freed!", file, line);
+                log_err("alloced at %s:%d", allocRecords[i].file, allocRecords[i].line);
+                log_err("previous freed at %s:%d", allocRecords[i].freeFile, allocRecords[i].freeLine);
+                break;
+            }
+        }
+    }
 }
 
-
-#ifdef MEM_DEBUG
 #define xmalloc(n) mem_malloc(n, __FILE__, __LINE__)
 #define xcalloc(s, n) mem_calloc(s, n, __FILE__, __LINE__)
 #define xrealloc(p, n) mem_realloc(p, n, __FILE__, __LINE__)

@@ -1,14 +1,6 @@
 #define TEST
+#define MEM_DEBUG
 #include "lib-mmy.h"
-
-//int shouldAssert = 0;
-//void assertTrigger(String file, int line) {
-//    if(shouldAssert) {
-//        dbg("Assert triggered successfully!");
-//    } else {
-//        dbg("Assert failed: %s:%d", file, line);
-//    }
-//}
 
 int main() {
     dbg("Starting tests...");
@@ -326,6 +318,13 @@ int main() {
     }
 
     ht_free(t);
+
+
+    // 007 tests
+
+    int *memory = xmalloc(sizeof(int));
+    xfree(memory);
+    xfree(memory);
 
     dbg("End of tests");
 }
