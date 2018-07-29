@@ -1,4 +1,14 @@
+#define TEST
 #include "lib-mmy.h"
+
+//int shouldAssert = 0;
+//void assertTrigger(String file, int line) {
+//    if(shouldAssert) {
+//        dbg("Assert triggered successfully!");
+//    } else {
+//        dbg("Assert failed: %s:%d", file, line);
+//    }
+//}
 
 int main() {
     dbg("Starting tests...");
@@ -164,9 +174,9 @@ int main() {
     assert(str_equal(str, "-12349876"));
     free(str);
     
-    // Have a version of assert for things that should break?
-    // shouldAssert(str_toint("12-12"));
-
+    shouldAssert(str_toint("12-12"));
+    shouldAssert(str_toint("--1212"));
+    shouldAssert(str_toint("1212-"));
 
     // 005. Tests
 #include <stdarg.h>

@@ -62,6 +62,9 @@
     006.
     Hash table.
 
+    007.
+    Memory debug stuff.
+
 */
 
 // 000. START 
@@ -88,13 +91,27 @@ typedef double f64;
 #define gigabytes(value) (megabytes(value)*1024)
 #define terabytes(value) (gigabytes(value)*1024)
 
-#ifdef DEBUG
+#ifdef TEST
+#define dbg(msg, ...) fprintf(stderr, "[DEBUG] (%s:%d) " msg "\n", \
+        __FILE__, __LINE__, ##__VA_ARGS__)
+int shouldAssert = 0;
+int assertFired = 0;
+#define assert(expr) if(!(expr)) { \
+        assertFired = 1; \
+        if(!shouldAssert) { dbg("Assert failed: " #expr); } }
+#define shouldAssert(expr) shouldAssert = 1; assertFired = 0; \
+        assert(expr) \
+        shouldAssert = 0; \
+        if(!assertFired) { log_err("Assert didn't fail: " #expr); }
+#elif DEBUG
 #define dbg(msg, ...) fprintf(stderr, "[DEBUG] (%s:%d) " msg "\n", \
         __FILE__, __LINE__, ##__VA_ARGS__)
 #define assert(expr) if(!(expr)) { dbg("Assert failed: " #expr); *(int*)0 = 0; }
+#define shouldAssert(expr) log_warn("shouldAssert should only be used for testing?");
 #else 
 #define dbg(msg, ...)
 #define assert(expr)
+#define shouldAssert(expr) log_warn("shouldAssert should only be used for testing?");
 #endif
 
 #define log_err(msg, ...) fprintf(stderr, "[ERROR] (%s:%d) " msg "\n", \
@@ -714,7 +731,8 @@ void ht_insert(HashTable *ht, char *key, void *value) {
     int index = ht_hash(ht, key);
     while(1) {
         if(!ht->keys[index]) {
-            ht->keys[index] = str_copy(key);
+            char *keyCopy = str_copy(key);
+            ht->keys[index] = keyCopy;
             ht->values[index] = value;
             ht->len++;
             return;
@@ -774,4 +792,56 @@ void ht_delete(HashTable *ht, char *key) {
     }
 }
 // 006. END
+#endif
+
+#if 0
+// 007. START
+
+typedef struct AllocRecord {
+    void *ptr;
+    u32 size;
+    char *file;
+    u32 line;
+} AllocRecord;
+
+AllocRecord *allocRecords = 0;
+
+void mem_alloc_instance(void *ptr, u32 size, char *file, u32 line) {
+}
+
+void *mem_malloc(u32 size, char *file, u32 line) {
+    void *ptr = malloc(size);
+    AllocRecord *ar; 
+    ar = malloc(sizeof(*ar));
+    ar->ptr = ptr;
+    ar->size = size;
+    ar->file = str_copy(file);
+    ar->line = line;
+        
+    return ptr;
+}
+
+void *mem_calloc(u32 num, u32 size) {
+    void *ptr = calloc(num, size);
+    return ptr;
+}
+
+void *mem_realloc(void *ptr, u32 size) {
+    void *res = realloc(ptr, size);
+    return res;
+}
+
+void mem_free(void *ptr) {
+    free(ptr);
+}
+
+
+#ifdef MEM_DEBUG
+#define xmalloc(n) mem_malloc(n, __FILE__, __LINE__)
+#define xcalloc(s, n) mem_calloc(s, n, __FILE__, __LINE__)
+#define xrealloc(p, n) mem_realloc(p, n, __FILE__, __LINE__)
+#define xfree(p) mem_free(p, __FILE__, __LINE__)
+#endif
+
+// 007. END
 #endif
