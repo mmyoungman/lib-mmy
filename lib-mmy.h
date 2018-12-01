@@ -65,6 +65,9 @@
     007.
     Memory debug stuff.
 
+    008.
+    Date stuff.
+
 */
 
 // 000. START 
@@ -901,4 +904,54 @@ void mem_free(void *ptr, char* file, int line) {
 #endif
 
 // 007. END
+#endif
+
+#if 1
+// 008. START
+
+char *date_suffix(int lastDigit) {
+    assert(lastDigit >= 0 && lastDigit <= 9);
+    switch(lastDigit) {
+        case 1: return str_copy("st");
+        case 2: return str_copy("nd");
+        case 3: return str_copy("rd");
+        default: return str_copy("th");
+    }
+}
+
+char *date_month(int monthNum) {
+    assert(monthNum >= 1 && monthNum <= 12); 
+    switch(monthNum) {
+        case 1: return str_copy("January");
+        case 2: return str_copy("February");
+        case 3: return str_copy("March");
+        case 4: return str_copy("April");
+        case 5: return str_copy("May");
+        case 6: return str_copy("June");
+        case 7: return str_copy("July");
+        case 8: return str_copy("August");
+        case 9: return str_copy("September");
+        case 10: return str_copy("October");
+        case 11: return str_copy("November");
+        case 12: return str_copy("December");
+    }
+}
+
+char *date_nice(int year, int month, int day) {
+    char *res = str_inttostr(day);
+    char *suffix = date_suffix(day % 10);
+    res = str_concat(res, suffix);
+    free(suffix);
+    res = str_concat(res, " ");
+    char *monthStr = date_month(month);
+    res = str_concat(res, monthStr);
+    free(monthStr);
+    res = str_concat(res, " ");
+    char *yearStr = str_inttostr(year);
+    res = str_concat(res, yearStr);
+    free(yearStr);
+    return res;
+}
+
+// 008. END
 #endif
