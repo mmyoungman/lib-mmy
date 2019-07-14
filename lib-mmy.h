@@ -408,6 +408,13 @@ char* str_copy(char *s) {
     return copy;
 }
 
+char* str_copy_char(char s) {
+    char* copy = (char*)xmalloc(sizeof(char)*2);
+    copy[0] = s;
+    copy[1] = '\0';
+    return copy;
+}
+
 int str_beginswith(char* str, char* start) {
     assert(str_len(start) <= str_len(str));
     while((*start != '\0') && (*start == *str)) {
@@ -564,9 +571,9 @@ int str_toint(char *str) {
     int length = str_len(str);
 
     while (length > 0) {
-        assert((*strPtr >= '0' && *strPtr <= '9') || (length == str_len(str) && *strPtr == '-'));
+        assert((*strPtr >= '0' && *strPtr <= '9') || (length == str_len(str) && (*strPtr == '-' || *strPtr == '+')));
         length--;
-        if(*strPtr == '-') { strPtr++; continue; }
+        if(*strPtr == '-' || *strPtr == '+') { strPtr++; continue; }
 
         // Calculate value based on position (i.e. value * 10^position)
         int exponent = 1;
